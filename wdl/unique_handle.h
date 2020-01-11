@@ -1,5 +1,5 @@
-// SmartHandle.h
-// RAII wrapper classes for raw Windows handles that 
+// unique_handle.h
+// RAII wrapper class for raw Windows handles that 
 // ensure automatic, safe resource management.
 
 #pragma once
@@ -53,9 +53,23 @@ namespace wdl
             return m_value != Traits::invalid();
         }
 
+        pointer* operator& () noexcept
+        {
+            close();
+            m_value = Traits::invalid();
+            return &m_value;
+        }
+
         pointer get() const noexcept
         {
             return m_value;
+        }
+
+        pointer* put() noexcept
+        {
+            close();
+            m_value = Traits::invalid();
+            return &m_value;
         }
 
         pointer release() noexcept
@@ -74,6 +88,11 @@ namespace wdl
             }
 
             return static_cast<bool>(*this);
+        }
+
+        pointer* addressof() const noexcept
+        {
+            return &m_value;
         }
 
     private:
