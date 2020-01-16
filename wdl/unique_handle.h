@@ -149,6 +149,27 @@ namespace wdl
         }
     };
 
+    // registry_handle_traits
+    //
+    // Traits definition appropriate for Windows
+    // handles returned by Registry API calls.
+
+    struct registry_handle_traits
+    {
+        using pointer = HKEY;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            ::RegCloseKey(value);
+        }
+    };
+
     using null_handle    = unique_handle<null_handle_traits>;
     using invalid_handle = unique_handle<invalid_handle_traits>;
+    using reg_handle     = unique_handle<registry_handle_traits>;
 }
