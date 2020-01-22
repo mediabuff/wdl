@@ -8,6 +8,18 @@
 
 namespace wdl
 {
+	// wait_one
+	// Simple wrapper around object wait for dispatcher objects.
+
+	template <typename T>
+	void wait_one(const T& arg)
+	{
+		VERIFY_(
+			WAIT_OBJECT_0,
+			::WaitForSingleObject(arg.get(), INFINITE)
+		);
+	}
+
 	// wait_all
 	// Variadic template for simplifying dispatcher object waits.
 

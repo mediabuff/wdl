@@ -37,7 +37,7 @@ namespace wdl
 		// rely on destructor for null_handle to clean up
 		~event() = default;
 
-		event(const event&) = delete;
+		event(const event&)            = delete;
 		event& operator=(const event&) = delete;
 
 		event(event&& other) noexcept
