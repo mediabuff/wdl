@@ -37,6 +37,11 @@ namespace wdl
 			::LeaveCriticalSection(&m_lock);
 		}
 
+		CRITICAL_SECTION* native_handle() const noexcept
+		{
+			return &m_lock;
+		}
+
 	private:
 		CRITICAL_SECTION m_lock;
 	};

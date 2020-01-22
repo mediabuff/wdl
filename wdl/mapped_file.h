@@ -1,5 +1,5 @@
-// io.h
-// Input / output utilties.
+// mapped_file.h
+// Windows memory mapped file wrapper.
 
 #pragma once
 

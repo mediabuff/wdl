@@ -49,4 +49,15 @@ namespace wdl
 			::WaitForMultipleObjects(sizeof...(Args), handles, true, INFINITE)
 		);
 	}
+
+	// wait_array
+	// Simple wrapper around object wait for dispatcher objects.
+
+	void wait_array(const HANDLE handles[], const unsigned size)
+	{
+		VERIFY_(
+			WAIT_OBJECT_0,
+			::WaitForMultipleObjects(size, handles, true, INFINITE)
+		);
+	}
 }
