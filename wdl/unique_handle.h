@@ -5,6 +5,9 @@
 #pragma once
 
 #include <windows.h>
+#include <winhttp.h>
+
+#include "debug.h"
 
 namespace wdl
 {
@@ -169,7 +172,70 @@ namespace wdl
         }
     };
 
+    // winhttp_traits
+    //
+    // Traits definition appropriate for use
+    // with the WinHTTP API.
+
+    struct winhttp_handle_traits
+    {
+        using pointer = HINTERNET;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            VERIFY(::WinHttpCloseHandle(value));
+        }
+    };
+
+    // pool_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows thread pool object
+
+    struct pool_handle_traits
+    {
+        using pointer = PTP_POOL;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            ::CloseThreadpool(value);
+        }
+    };
+
+    // work_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows thread pool work object.
+
+    struct work_handle_traits
+    {
+        using pointer = PTP_WORK;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            ::CloseThreadpoolWork(value);
+        }
+    };
+
     using null_handle    = unique_handle<null_handle_traits>;
     using invalid_handle = unique_handle<invalid_handle_traits>;
     using reg_handle     = unique_handle<registry_handle_traits>;
+    using winhttp_handle = unique_handle<winhttp_handle_traits>;
+    using pool_handle    = unique_handle<pool_handle_traits>;
+    using work_handle    = unique_handle<work_handle_traits>;
 }
