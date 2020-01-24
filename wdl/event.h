@@ -25,6 +25,7 @@ namespace wdl
 
 	class event
 	{
+	public:
 		explicit event(event::type type)
 			: h{ ::CreateEvent(nullptr, static_cast<bool>(type), false, nullptr) }
 		{

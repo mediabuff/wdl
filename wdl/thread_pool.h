@@ -10,6 +10,7 @@ namespace wdl
 
 	class tp_environment
 	{
+	public:
 		tp_environment() noexcept
 		{
 			::InitializeThreadpoolEnvironment(&m_handle);

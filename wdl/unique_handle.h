@@ -168,7 +168,7 @@ namespace wdl
 
         static void close(pointer value) noexcept
         {
-            ::RegCloseKey(value);
+            VERIFY_(ERROR_SUCCESS, ::RegCloseKey(value));
         }
     };
 
@@ -232,10 +232,72 @@ namespace wdl
         }
     };
 
+    // wait_handle_traits
+    // Traits definition appropriate for use
+    // with Windows thread pool wait objects.
+
+    struct wait_handle_traits
+    {
+        using pointer = PTP_WAIT;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            ::CloseThreadpoolWait(value);
+        }
+    };
+
+    // timer_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows thread pool timer object.
+
+    struct timer_handle_traits
+    {
+        using pointer = PTP_TIMER;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            ::CloseThreadpoolTimer(value);
+        }
+    };
+
+    // cleanup_group_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows thread pool cleanup group object.
+
+    struct cleanup_group_traits
+    {
+        using pointer = PTP_CLEANUP_GROUP;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            ::CloseThreadpoolCleanupGroup(value);
+        }
+    };
+
     using null_handle    = unique_handle<null_handle_traits>;
     using invalid_handle = unique_handle<invalid_handle_traits>;
     using reg_handle     = unique_handle<registry_handle_traits>;
     using winhttp_handle = unique_handle<winhttp_handle_traits>;
     using pool_handle    = unique_handle<pool_handle_traits>;
     using work_handle    = unique_handle<work_handle_traits>;
+    using wait_handle    = unique_handle<wait_handle_traits>;
+    using timer_handle   = unique_handle<timer_handle_traits>;
+    using cleanup_group  = unique_handle<cleanup_group_traits>;
 }
