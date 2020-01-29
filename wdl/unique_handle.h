@@ -6,6 +6,7 @@
 
 #include <windows.h>
 #include <winhttp.h>
+#include <utility>
 
 #include "debug.h"
 
@@ -98,6 +99,11 @@ namespace wdl
             return &m_value;
         }
 
+        void swap(unique_handle<Traits>& other) noexcept
+        {
+            std::swap(m_value, other.m_value);
+        }
+
     private:
         pointer m_value;
 
@@ -109,6 +115,19 @@ namespace wdl
             }
         }
     };
+
+    // swap
+    //
+    // Free swap() implementation to accelerate container operations.
+
+    template <typename Traits>
+    void swap(
+        unique_handle<Traits>& left,
+        unique_handle<Traits>& right
+    )
+    {
+        left.swap(right);
+    }
 
     // null_handle_traits
     // 
