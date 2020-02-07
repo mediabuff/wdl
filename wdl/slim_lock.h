@@ -1,6 +1,8 @@
 // slim_lock.h
 // Windows Slim Reader/Writer lock wrapper.
 
+#pragma once
+
 #include <windows.h>
 #include "auto_lock.h"
 

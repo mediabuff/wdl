@@ -1,6 +1,8 @@
 // token.h
 // Utility functions for working with Windows access tokens.
 
+#pragma once
+
 #include <windows.h>
 #include <iostream>
 

@@ -1,6 +1,8 @@
 // condition_variable.h
 // Windows Condition Variable wrapper.
 
+#pragma once
+
 #include <windows.h>
 
 #include "debug.h"

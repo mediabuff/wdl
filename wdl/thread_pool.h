@@ -1,6 +1,8 @@
 // thread_pool.h
 // Windows Thread Pool utilties.
 
+#pragma once
+
 #include <windows.h>
 
 namespace wdl

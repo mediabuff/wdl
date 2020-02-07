@@ -1,6 +1,8 @@
 // exception.h
 // Custom WDL exception classes.
 
+#pragma once
+
 #include <windows.h>
 
 namespace wdl

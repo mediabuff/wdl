@@ -1,6 +1,8 @@
 // critical_section.h
 // Windows Critical Section object wrapper
 
+#pragma once
+
 #include <windows.h>
 
 namespace wdl

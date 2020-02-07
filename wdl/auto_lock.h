@@ -1,6 +1,8 @@
 // auto_lock.h
 // Scoped-based lock wrapper.
 
+#pragma once
+
 #include <windows.h>
 
 namespace wdl

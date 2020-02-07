@@ -1,6 +1,8 @@
 // thread.h
 // Windows threading utilities.
 
+#pragma once
+
 #include <windows.h>
 #include "unique_handle.h"
 

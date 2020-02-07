@@ -1,6 +1,8 @@
 // mutex.h
 // Windows Mutex object wrapper.
 
+#pragma once
+
 #include <windows.h>
 #include <string>
 #include "exception.h"
