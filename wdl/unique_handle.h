@@ -99,6 +99,11 @@ namespace wdl
             return &m_value;
         }
 
+        pointer* get_address_of() noexcept
+        {
+            return &m_value;
+        }
+
         void swap(unique_handle<Traits>& other) noexcept
         {
             std::swap(m_value, other.m_value);
@@ -310,13 +315,76 @@ namespace wdl
         }
     };
 
-    using null_handle    = unique_handle<null_handle_traits>;
-    using invalid_handle = unique_handle<invalid_handle_traits>;
-    using reg_handle     = unique_handle<registry_handle_traits>;
-    using winhttp_handle = unique_handle<winhttp_handle_traits>;
-    using pool_handle    = unique_handle<pool_handle_traits>;
-    using work_handle    = unique_handle<work_handle_traits>;
-    using wait_handle    = unique_handle<wait_handle_traits>;
-    using timer_handle   = unique_handle<timer_handle_traits>;
-    using cleanup_group  = unique_handle<cleanup_group_traits>;
+    // provider_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows CNG cryptography providers.
+
+    struct provider_handle_traits
+    {
+        using pointer = BCRYPT_ALG_HANDLE;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            VERIFY_(ERROR_SUCCESS, ::BCryptCloseAlgorithmProvider(value, 0));
+        }
+    };
+
+    // hash_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows CNG cryptographic hash providers.
+
+    struct hash_handle_traits
+    {
+        using pointer = BCRYPT_ALG_HANDLE;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            VERIFY_(ERROR_SUCCESS, ::BCryptDestroyHash(value));
+        }
+    };
+
+    // key_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows CNG cryptographic keys.
+
+    struct key_handle_traits
+    {
+        using pointer = BCRYPT_KEY_HANDLE;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            VERIFY_(ERROR_SUCCESS, ::BCryptDestroyKey(value));
+        }
+    };
+
+    using null_handle     = unique_handle<null_handle_traits>;
+    using invalid_handle  = unique_handle<invalid_handle_traits>;
+    using reg_handle      = unique_handle<registry_handle_traits>;
+    using winhttp_handle  = unique_handle<winhttp_handle_traits>;
+    using pool_handle     = unique_handle<pool_handle_traits>;
+    using work_handle     = unique_handle<work_handle_traits>;
+    using wait_handle     = unique_handle<wait_handle_traits>;
+    using timer_handle    = unique_handle<timer_handle_traits>;
+    using cleanup_group   = unique_handle<cleanup_group_traits>;
+    using provider_handle = unique_handle<provider_handle_traits>;
+    using hash_handle     = unique_handle<hash_handle_traits>;
+    using key_handle      = unique_handle<key_handle_traits>;
 }
