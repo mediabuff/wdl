@@ -1,12 +1,16 @@
 // exception.h
-// Custom WDL exception classes.
+// Class Implementation: wdl::utility::windows_exception
+//
+// Custom WDL exception class.
 
 #pragma once
 
 #include <windows.h>
 
-namespace wdl
+namespace wdl::utility
 {
+	// windows_exception
+
 	class windows_exception
 	{
 	public:

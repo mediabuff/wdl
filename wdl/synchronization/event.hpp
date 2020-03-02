@@ -1,17 +1,23 @@
 // event.h
+// Class Implementation: wdl::synchronization::event
+//
 // Windows Event object wrapper.
 
 #pragma once
 
 #include <windows.h>
 
-#include "debug.h"
-#include "exception.h"
-#include "unique_handle.h"
+#include "wdl/debug/debug.hpp"
+#include "wdl/utility/exception.hpp"
+#include "wdl/utility/unique_handle.hpp"
 
-namespace wdl
+using wdl::utility::null_handle;
+using wdl::utility::windows_exception;
+
+namespace wdl::synchronization
 {
 	// event_type
+	//
 	// Windows event type enumeration.
 
 	enum class event_type
@@ -21,17 +27,18 @@ namespace wdl
 	};
 
 	// event
+	//
 	// WDL wrapper around Windows events implementing RAII.
 
 	class event
 	{
 	public:
-		explicit event(event::type type)
-			: h{ ::CreateEvent(nullptr, static_cast<bool>(type), false, nullptr) }
+		explicit event(event_type type)
+			: handle{ ::CreateEvent(nullptr, static_cast<bool>(type), false, nullptr) }
 		{
-			if (!h)
+			if (!handle)
 			{
-				throw windows_exception();
+				throw windows_exception{};
 			}
 		}
 
@@ -42,30 +49,32 @@ namespace wdl
 		event& operator=(const event&) = delete;
 
 		event(event&& other) noexcept
-			: handle{ other.h.release() }
+			: handle{ other.handle.release() }
 		{}
 
 		event& operator=(event&& rhs) noexcept
 		{
-			if (this != rhs)
+			if (this != &rhs)
 			{
-				h = std::move(rhs.h);
+				handle = std::move(rhs.handle);
 			}
+			
+			return *this;
 		}
 
 		void set() noexcept
 		{
-			VERIFY(::SetEvent(h.get()));
+			VERIFY(::SetEvent(handle.get()));
 		}
 
 		void reset() noexcept
 		{
-			VERIFY(::ResetEvent(h.get()));
+			VERIFY(::ResetEvent(handle.get()));
 		}
 
 		bool wait(const unsigned long ms = INFINITE) noexcept
 		{
-			const auto res = ::WaitForSingleObject(h.get(), ms);
+			const auto res = ::WaitForSingleObject(handle.get(), ms);
 
 			ASSERT(res == WAIT_OBJECT_0 || res == WAIT_TIMEOUT);
 
@@ -74,10 +83,10 @@ namespace wdl
 
 		HANDLE get() const noexcept
 		{
-			return h.get();
+			return handle.get();
 		}
 
 	private:
-		null_handle h;
+		null_handle handle;
 	};
 }

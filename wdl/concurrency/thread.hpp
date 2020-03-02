@@ -1,12 +1,17 @@
 // thread.h
+// Class Implementation: wdl::concurrency::thread
+//
 // Windows threading utilities.
 
 #pragma once
 
 #include <windows.h>
-#include "unique_handle.h"
 
-namespace wdl
+#include "wdl/utility/unique_handle.hpp"
+
+using wdl::utility::null_handle;
+
+namespace wdl::concurrency
 {
 	using thread_callback = void (*)();
 

@@ -1,13 +1,16 @@
 // thread_pool.h
+// Class Implementation: wdl::threadpool::tp_environment
+//
 // Windows Thread Pool utilties.
 
 #pragma once
 
 #include <windows.h>
 
-namespace wdl
+namespace wdl::threadpool
 {
 	// tp_environment
+	//
 	// Thread pool environment wrapper.
 
 	class tp_environment

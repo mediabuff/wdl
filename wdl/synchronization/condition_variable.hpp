@@ -1,17 +1,23 @@
 // condition_variable.h
+// Class Implementation: wdl::synchronization::condition_variable
+//
 // Windows Condition Variable wrapper.
 
 #pragma once
 
 #include <windows.h>
 
-#include "debug.h"
-#include "slim_lock.h"
-#include "critical_section.h"
+#include "wdl/debug/debug.hpp"
+#include "wdl/synchronization/slim_lock.hpp"
+#include "wdl/synchronization/critical_section.hpp"
 
-namespace wdl
+using wdl::synchronization::slim_lock;
+using wdl::synchronization::critical_section;
+
+namespace wdl::synchronization
 {
 	// condition_variable
+	//
 	// Windows Condition Variable wrapper.
 
 	class condition_variable

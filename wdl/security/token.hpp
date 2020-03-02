@@ -1,4 +1,7 @@
 // token.h
+// Free Function Definitions:
+//	open_current_token()
+//
 // Utility functions for working with Windows access tokens.
 
 #pragma once
@@ -6,9 +9,11 @@
 #include <windows.h>
 #include <iostream>
 
-#include "unique_handle.h"
+#include "wdl/utility/unique_handle.hpp"
 
-namespace wdl
+using wdl::utility::null_handle;
+
+namespace wdl::security
 {
 	enum class OpenThreadTokenAs
 	{
@@ -17,6 +22,7 @@ namespace wdl
 	};
 
 	// open_current_token
+	//
 	// Acquire a handle to access token representing the security context
 	// of the currently executing thread or its containing process.
 	//

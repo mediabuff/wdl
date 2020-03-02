@@ -1,4 +1,8 @@
-// performance.h
+// timing.h
+// Class Implementations:
+//  wdl::timing::scoped_timer
+//  wdl::timing::callback_timer
+//
 // Simple performance benchmarking utilities.
 
 #pragma once
@@ -8,20 +12,21 @@
 #include <iostream>
 #include <functional>
 
-namespace wdl
+namespace wdl::timing
 {
     // timer
+    //
     // RAII-based timer class; prints duration to stdout
 
-    struct timer
+    struct scoped_timer
     {
-        timer(const std::string& label = "")
+        scoped_timer(const std::string& label = "")
             : label{label}
         {
             start_timepoint = std::chrono::high_resolution_clock::now();
         }
 
-        ~timer()
+        ~scoped_timer()
         {
             stop();
         }
@@ -53,6 +58,7 @@ namespace wdl
     };
 
     // callback_timer
+    //
     // RAII-based timer class that accepts a callback function invoked on expiration
 
     struct callback_timer

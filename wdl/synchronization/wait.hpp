@@ -1,14 +1,21 @@
-// sync.h
+// wait.h
+// Free Function Implementations:
+//	wait_one()
+//	wait_all()
+//	wait_array()
+//
 // Synchronization utilties.
 
 #pragma once
 
 #include <windows.h>
-#include "debug.h"
 
-namespace wdl
+#include "wdl/debug/debug.hpp"
+
+namespace wdl::synchronization
 {
 	// wait_one
+	//
 	// Simple wrapper around object wait for dispatcher objects.
 
 	template <typename T>
@@ -21,6 +28,7 @@ namespace wdl
 	}
 
 	// wait_all
+	//
 	// Variadic template for simplifying dispatcher object waits.
 
 	void pack(HANDLE*) {}
@@ -51,6 +59,7 @@ namespace wdl
 	}
 
 	// wait_array
+	//
 	// Simple wrapper around object wait for dispatcher objects.
 
 	void wait_array(const HANDLE handles[], const unsigned size)

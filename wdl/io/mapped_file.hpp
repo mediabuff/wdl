@@ -1,14 +1,20 @@
 // mapped_file.h
+// Class Implementation: wdl::io::mapped_file
+//
 // Windows memory mapped file wrapper.
 
 #pragma once
 
 #include <windows.h>
-#include "unique_handle.h"
+#include "wdl/utility/unique_handle.hpp"
 
-namespace wdl
+using wdl::utility::null_handle;
+using wdl::utility::invalid_handle;
+
+namespace wdl::io
 {
 	// mapped_file
+	//
 	// RAII wrapper around memory mapped file.
 	// Mapped for readonly access.
 
@@ -128,6 +134,7 @@ namespace wdl
 	};
 
 	// begin
+	//
 	// Free iterator function.
 
 	const char* begin(const mapped_file& file) noexcept
@@ -136,6 +143,7 @@ namespace wdl
 	}
 
 	// end
+	//
 	// Free iterator function.
 
 	const char* end(const mapped_file& file) noexcept

@@ -1,11 +1,14 @@
 // deleter.h
+// Class Implementations:
+//	wdl::utility::map_view_deleter
+//
 // Custom deleter definitions for use with C++ standard library smart pointers.
 
 #pragma once
 
 #include <windows.h>
 
-namespace wdl
+namespace wdl::utility
 {
 	// map_view_deleter
 	// 

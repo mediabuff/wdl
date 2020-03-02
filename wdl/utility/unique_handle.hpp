@@ -1,4 +1,6 @@
 // unique_handle.h
+// Class Implementation: wdl::utility::unique_handle
+//
 // RAII wrapper class for raw Windows handles that 
 // ensure automatic, safe resource management.
 
@@ -8,9 +10,9 @@
 #include <winhttp.h>
 #include <utility>
 
-#include "debug.h"
+#include "wdl/debug/debug.hpp"
 
-namespace wdl
+namespace wdl::utility
 {
     // unique_handle
     //

@@ -1,4 +1,6 @@
 // message_queue.h
+// Class Implementation: wdl::misc::message_queue
+//
 // Simple message queue implemented via Window events.
 
 #pragma once

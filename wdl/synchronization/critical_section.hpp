@@ -1,14 +1,17 @@
 // critical_section.h
+// Class Implementation: wdl::synchronization::critical_section
+// 
 // Windows Critical Section object wrapper
 
 #pragma once
 
 #include <windows.h>
 
-namespace wdl
+namespace wdl::synchronization
 {
 
 	// critical_section
+	//
 	// Windows Critical Section type wrapper.
 
 	class critical_section

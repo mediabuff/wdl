@@ -1,14 +1,18 @@
 // slim_lock.h
+// Class Implementations:
+//	wdl::synchronization::slim_lock
+//	wdl::synchronization::slim_auto_lock
+//
 // Windows Slim Reader/Writer lock wrapper.
 
 #pragma once
 
 #include <windows.h>
-#include "auto_lock.h"
 
-namespace wdl
+namespace wdl::synchronization
 {
 	// slim_auto_lock
+	//
 	// An RAII-based scoped lock with semantics that are
 	// approriate for wrapping slim_lock objects.
 	//
@@ -41,6 +45,7 @@ namespace wdl
 	};
 
 	// slim_lock
+	//
 	// Windows Slim Reader/Writer lock wrapper.
 
 	class slim_lock
