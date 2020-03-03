@@ -16,6 +16,9 @@ namespace wdl::synchronization
 
 	class critical_section
 	{
+
+		CRITICAL_SECTION m_lock;
+
 	public:
 		critical_section() noexcept
 		{
@@ -42,12 +45,9 @@ namespace wdl::synchronization
 			::LeaveCriticalSection(&m_lock);
 		}
 
-		CRITICAL_SECTION* native_handle() const noexcept
+		LPCRITICAL_SECTION native_handle() const noexcept
 		{
 			return &m_lock;
 		}
-
-	private:
-		CRITICAL_SECTION m_lock;
 	};
 }
