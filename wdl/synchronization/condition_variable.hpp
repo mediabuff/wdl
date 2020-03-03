@@ -28,8 +28,8 @@ namespace wdl::synchronization
 		{}
 
 		condition_variable(const condition_variable& other)          = delete;
-		condition_variable(condition_variable&& other)               = delete;
 		condition_variable& operator=(const condition_variable& rhs) = delete;
+		condition_variable(condition_variable&& other)               = delete;
 		condition_variable& operator=(condition_variable&& rhs)      = delete;
 
 		template <typename T>
@@ -63,8 +63,6 @@ namespace wdl::synchronization
 		void wake_one() noexcept
 		{
 			::WakeConditionVariable(&m_cv);
-
-			SleepCondition
 		}
 
 		void wake_all() noexcept

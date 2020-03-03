@@ -25,14 +25,19 @@ namespace wdl::synchronization
 			::InitializeCriticalSection(&m_lock);
 		}
 
+		critical_section(unsigned long spin_count) noexcept
+		{
+			::InitializeCriticalSectionAndSpinCount(&m_lock, spin_count);
+		}
+
 		~critical_section() noexcept
 		{
 			::DeleteCriticalSection(&m_lock);
 		}
 
 		critical_section(const critical_section& other)          = delete;
-		critical_section(critical_section&& other)               = delete;
 		critical_section& operator=(const critical_section& rhs) = delete;
+		critical_section(critical_section&& other)               = delete;
 		critical_section& operator=(critical_section&& rhs)      = delete;
 
 		void enter() noexcept
@@ -45,7 +50,7 @@ namespace wdl::synchronization
 			::LeaveCriticalSection(&m_lock);
 		}
 
-		LPCRITICAL_SECTION native_handle() const noexcept
+		LPCRITICAL_SECTION native_handle() noexcept
 		{
 			return &m_lock;
 		}
