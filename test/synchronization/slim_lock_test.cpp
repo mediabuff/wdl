@@ -15,8 +15,8 @@
 #include "wdl/synchronization/wait.hpp"
 #include "wdl/synchronization/slim_lock.hpp"
 
-auto lock   = wdl::synchronization::slim_lock{};
-auto shared = int{};
+auto g_lock   = wdl::synchronization::slim_lock{};
+auto g_shared = int{};
 
 void reader() noexcept
 {
@@ -26,13 +26,13 @@ void reader() noexcept
 	{
 		std::this_thread::sleep_for(10ms);
 
-		auto guard = lock.get_shared();
+		auto guard = g_lock.get_shared();
 
 		std::this_thread::sleep_for(500ms);
 
-		if (shared < 5)
+		if (g_shared < 5)
 		{
-			printf("shared=%d; id=%u\n", shared, wdl::concurrency::thread_id());
+			printf("shared=%d; id=%u\n", g_shared, wdl::concurrency::thread_id());
 		}
 		else
 		{
@@ -53,9 +53,9 @@ int main()
 		for (unsigned i = 0; i < 5; ++i)
 		{
 			std::this_thread::sleep_for(1s);
-			auto gaurd = lock.get_exclusive();
+			auto gaurd = g_lock.get_exclusive();
 
-			++shared;
+			++g_shared;
 		}
 	});
 
