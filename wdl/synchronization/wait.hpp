@@ -18,12 +18,26 @@ namespace wdl::synchronization
 	//
 	// Simple wrapper around object wait for dispatcher objects.
 
-	template <typename T>
-	void wait_one(const T& arg)
+	void wait_one(
+		const HANDLE handle, 
+		const unsigned long timeout = INFINITE
+		)
 	{
 		VERIFY_(
 			WAIT_OBJECT_0,
-			::WaitForSingleObject(arg.get(), INFINITE)
+			::WaitForSingleObject(handle, timeout)
+		);
+	}
+
+	template <typename T>
+	void wait_one(
+		const T& arg, 
+		const unsigned long timeout = INFINITE
+		)
+	{
+		VERIFY_(
+			WAIT_OBJECT_0,
+			::WaitForSingleObject(arg.get(), timeout)
 		);
 	}
 
