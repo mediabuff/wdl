@@ -34,27 +34,27 @@ namespace wdl::utility
         {
             close();
         }
-
-        unique_handle(unique_handle const& other) = delete;
-
-        auto operator=(unique_handle const& rhs)->unique_handle & = delete;
+        
+        // non-copyable
+        unique_handle(unique_handle const&)            = delete;
+        unique_handle& operator=(unique_handle const&) = delete;
 
         unique_handle(unique_handle&& other) noexcept
             : m_value{ other.release() }
-        {
-        }
+        {}
 
         unique_handle& operator=(unique_handle&& rhs) noexcept
         {
-            if (this != &rhs)
-            {
-                reset(rhs.release());
-            }
-
+            reset(rhs.release());
             return *this;
         }
 
         explicit operator bool() const noexcept
+        {
+            return m_value != Traits::invalid();
+        }
+
+        bool valid() const noexcept
         {
             return m_value != Traits::invalid();
         }

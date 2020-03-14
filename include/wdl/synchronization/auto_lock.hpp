@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <windows.h>
-
 namespace wdl::synchronization
 {
 	// auto_lock

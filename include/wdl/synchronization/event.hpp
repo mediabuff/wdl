@@ -35,18 +35,13 @@ namespace wdl::synchronization
 	public:
 		explicit event(event_type type)
 			: handle{ ::CreateEvent(nullptr, static_cast<bool>(type), false, nullptr) }
-		{
-			if (!handle)
-			{
-				throw windows_exception{};
-			}
-		}
+		{}
 
 		// rely on destructor for null_handle to clean up
 		~event() = default;
 
-		event(const event&)            = delete;
-		event& operator=(const event&) = delete;
+		event(event&)            = delete;
+		event& operator=(event&) = delete;
 
 		event(event&& other) noexcept
 			: handle{ other.handle.release() }
@@ -84,6 +79,16 @@ namespace wdl::synchronization
 		HANDLE get() const noexcept
 		{
 			return handle.get();
+		}
+
+		bool valid() const noexcept
+		{
+			return handle ? true : false;
+		}
+
+		explicit operator bool()
+		{
+			return handle ? true : false; 
 		}
 
 	private:
