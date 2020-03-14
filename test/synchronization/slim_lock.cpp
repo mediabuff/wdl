@@ -1,4 +1,4 @@
-// slim_lock_test.cpp
+// slim_lock.cpp
 // Unit Test: wdl::synchronization::slim_lock
 //
 // Demonstration of WDL library use with Windows SRW locks.

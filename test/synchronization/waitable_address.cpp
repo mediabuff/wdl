@@ -1,4 +1,4 @@
-// waitable_address_test.cpp
+// waitable_address.cpp
 // Unit Test: wdl::synchronization::waitable_address
 //
 // Build

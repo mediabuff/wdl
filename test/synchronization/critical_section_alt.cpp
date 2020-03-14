@@ -1,4 +1,4 @@
-// critical_section_alt_test.cpp
+// critical_section_alt.cpp
 // Unit Test: wdl::synchronization::critical_section_alt
 //
 // Demonstration of use of alternative critical section implementation.

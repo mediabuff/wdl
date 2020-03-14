@@ -1,4 +1,4 @@
-// wait_test.cpp
+// wait.cpp
 // Unit Test: wdl::synchronization::wait_all
 //
 // Demonstration of dispatcher object synchronization with WDL.

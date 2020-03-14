@@ -1,4 +1,4 @@
-// critical_section_test.cpp
+// critical_section.cpp
 // Unit Test: wdl::synchronization::critical_section
 //
 // Demonstration of use of critical section wrapper.

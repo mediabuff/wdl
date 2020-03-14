@@ -1,4 +1,4 @@
-// barrier_test.cpp
+// barrier.cpp
 // Unit Test: wdl::synchronization::barrier
 //
 // Build

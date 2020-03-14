@@ -377,6 +377,46 @@ namespace wdl::utility
         }
     };
 
+    // np_client_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows named pipe client.
+
+    struct np_client_handle_traits
+    {
+        using pointer = HANDLE;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return INVALID_HANDLE_VALUE;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            VERIFY(::CloseHandle(value));
+        }
+    };
+
+    // np_server_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows named pipe server.
+
+    struct np_server_handle_traits
+    {
+        using pointer = HANDLE;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return INVALID_HANDLE_VALUE;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            VERIFY(::DisconnectNamedPipe(value));
+        }
+    };
+
     using null_handle     = unique_handle<null_handle_traits>;
     using invalid_handle  = unique_handle<invalid_handle_traits>;
     using reg_handle      = unique_handle<registry_handle_traits>;
@@ -389,4 +429,6 @@ namespace wdl::utility
     using provider_handle = unique_handle<provider_handle_traits>;
     using hash_handle     = unique_handle<hash_handle_traits>;
     using key_handle      = unique_handle<key_handle_traits>;
+    using client_pipe     = unique_handle<np_client_handle_traits>;
+    using server_pipe     = unique_handle<np_server_handle_traits>;
 }
