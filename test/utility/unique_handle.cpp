@@ -12,16 +12,16 @@ TEST_CASE("wdl::utility::unique_handle lifetime semantics")
 
 	auto src = null_handle{ ::CreateEvent(nullptr, false, false, nullptr) };
 
-	REQUIRE(src.valid());
+	REQUIRE(src.is_valid());
 
 	auto dst = null_handle{ std::move(src) };
 
-	REQUIRE(dst.valid());
-	REQUIRE_FALSE(src.valid());
+	REQUIRE(dst.is_valid());
+	REQUIRE_FALSE(src.is_valid());
 
 	src = std::move(dst);
 
-	REQUIRE(src.valid());
-	REQUIRE_FALSE(dst.valid());
+	REQUIRE(src.is_valid());
+	REQUIRE_FALSE(dst.is_valid());
 }
 

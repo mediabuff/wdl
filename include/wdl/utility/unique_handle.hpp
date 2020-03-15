@@ -54,7 +54,7 @@ namespace wdl::utility
             return m_value != Traits::invalid();
         }
 
-        bool valid() const noexcept
+        bool is_valid() const noexcept
         {
             return m_value != Traits::invalid();
         }
