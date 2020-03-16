@@ -9,6 +9,12 @@
 
 namespace wdl::threadpool
 {
+	// wdl::threadpool::io_completion_f
+	//
+	// Defines function signature for IO completion callback.
+
+	using io_completion_f = void(*)(unsigned long, ULONG_PTR); 
+
 	// wdl::threadpool::pool
     //
     // Wrapper around user-controlled threadpool.
@@ -17,9 +23,6 @@ namespace wdl::threadpool
 	{
         environment               m_environment;
 		wdl::utility::pool_handle m_handle;
-
-        using callback_f      = void(*)();
-		using io_completion_f = void(*)(unsigned long, ULONG_PTR); 
 
 	public:
 		pool()
@@ -31,11 +34,7 @@ namespace wdl::threadpool
 		// rely on unique_handle for release
 		~pool() = default;
 
-		template <typename Callback>
-		bool submit_callback(Callback work);
-
-		template <typename Callback>
-		PTP_IO register_io(HANDLE handle, Callback handler);
+		PTP_IO register_io(HANDLE handle, io_completion_f handler);
 
 		void set_max_threadcount(unsigned long count);
 		bool set_min_threadcount(unsigned long count);
@@ -45,15 +44,9 @@ namespace wdl::threadpool
 			return static_cast<bool>(m_handle);
 		}
 
-    private:
-		// proxy for callback completion
-        static void __stdcall callback_wrapper(
-			PTP_CALLBACK_INSTANCE, 
-			void* args
-			);
-		
+    private:		
 		// proxy for io completion
-		static void __stdcall io_completion_wrapper(
+		static void __stdcall io_completion_trampoline(
 			PTP_CALLBACK_INSTANCE instance,
 			void*                 context, 
 			void*                 overlapped,
@@ -62,27 +55,16 @@ namespace wdl::threadpool
 			PTP_IO                io
 			);
 	};
-
-	template <typename Callback>
-	bool pool::submit_callback(Callback work)
-	{
-		return ::TrySubmitThreadpoolCallback(
-			callback_wrapper, 
-			static_cast<stateless_function>(work), 
-			m_environment.get()
-			);
-	}
 	
-	template <typename Callback>
 	PTP_IO pool::register_io(
-		HANDLE   handle, 
-		Callback handler
+		HANDLE          handle, 
+		io_completion_f handler
 		)
 	{
         // create the io object
         auto io_object = ::CreateThreadpoolIo(
             handle, 
-            io_completion_wrapper,
+            io_completion_trampoline,
             static_cast<void*>(handler),
             m_environment.get()
             );
@@ -103,16 +85,7 @@ namespace wdl::threadpool
 		return ::SetThreadpoolThreadMinimum(m_handle.get(), count);
 	}
 
-	void __stdcall pool::callback_wrapper(
-		PTP_CALLBACK_INSTANCE, 
-		void* args
-		)
-	{
-		auto fn = static_cast<callback_f>(args);
-		fn();
-	}
-
-	void __stdcall pool::io_completion_wrapper(
+	void __stdcall pool::io_completion_trampoline(
 		PTP_CALLBACK_INSTANCE instance,
 		void*                 context, 
 		void*                 overlapped,

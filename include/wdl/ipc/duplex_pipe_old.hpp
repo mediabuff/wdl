@@ -13,8 +13,8 @@
 
 #include <wdl/utility/unique_handle.hpp>
 
-using wdl::utility::server_pipe;
-using wdl::utility::client_pipe;
+using wdl::utility::np_server_handle;
+using wdl::utility::np_client_handle;
 
 // namespace alias for Windows concurrency runtime namespace
 namespace wincrt = concurrency;
@@ -43,8 +43,8 @@ namespace wdl::ipc
         std::wstring m_local_name;
         std::wstring m_remote_name;
 
-        server_pipe  m_recv_pipe;
-        client_pipe  m_send_pipe;
+        np_server_handle  m_recv_pipe;
+        np_client_handle  m_send_pipe;
 
     public:
         duplex_pipe_old(
@@ -127,7 +127,7 @@ namespace wdl::ipc
 
     bool duplex_pipe_old::accept()
     {
-        m_recv_pipe = server_pipe
+        m_recv_pipe = np_server_handle
         {
             ::CreateNamedPipeW(
                 m_local_name.c_str(),
@@ -158,7 +158,7 @@ namespace wdl::ipc
             return false;
         }
         
-        m_send_pipe = client_pipe
+        m_send_pipe = np_client_handle
         {
             ::CreateFileW(
                 m_remote_name.c_str(),

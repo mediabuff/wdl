@@ -31,10 +31,9 @@ namespace wdl::ipc
 
         void listen(std::wstring const& local_name);
 
-        template <typename Callback>
         void accept_async(
-            wdl::ipc::duplex_pipe& handler_pipe,
-            Callback&&             handler
+            wdl::ipc::duplex_pipe&           handler_pipe,
+            wdl::threadpool::io_completion_f completion_handler
             );
     };
 
@@ -43,17 +42,16 @@ namespace wdl::ipc
         m_name = local_name;
     }
 
-    template <typename Callback>
     void pipe_acceptor::accept_async(
-        wdl::ipc::duplex_pipe& handler_pipe,
-        Callback&&             handler
+        wdl::ipc::duplex_pipe&           handler_pipe,
+        wdl::threadpool::io_completion_f completion_handler
         )
     {   
         // register the read end of the pipe with the 
         // threadpool for IO completions
         m_pool.register_io(
             handler_pipe.server_native_handle(),
-            std::forward<Callback>(handler)
+            completion_handler
             );
 
         // setup the pipe to listen on the acceptor's interface
