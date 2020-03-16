@@ -10,36 +10,17 @@
 #include <ppltasks.h>
 
 #include <string>
+#include <stdexcept>
 
 #include <wdl/utility/unique_handle.hpp>
 
 using wdl::utility::server_pipe;
 using wdl::utility::client_pipe;
 
-// namespace alias for Windows concurrency runtime namespace
-namespace wincrt = concurrency;
-
 namespace wdl::ipc
 {
-    // wdl::ipc::pipe_type
-    //
-    // Distinguishes duplex pipe types
-    // for negotiation purposes.
-
-    enum class pipe_type
-    {
-        client,
-        server
-    };
-
-    // wdl::ipc::duplex_pipe
-    //
-    // Full duplex named-pipe implementation.
-
     class duplex_pipe
-    {   
-        pipe_type m_type;
-
+    {
         std::wstring m_local_name;
         std::wstring m_remote_name;
 
@@ -47,86 +28,36 @@ namespace wdl::ipc
         client_pipe  m_send_pipe;
 
     public:
-        duplex_pipe(
-            pipe_type           type,
-            std::wstring const& local, 
-            std::wstring const& remote
-            )
-            : m_type{ type }
-            , m_local_name{ local }
-            , m_remote_name{ remote }
-        {}
-
-        // rely on unique_handle dtors to handle resource release
+        duplex_pipe()  = default;
         ~duplex_pipe() = default;
 
         // non-copyable
         duplex_pipe(duplex_pipe const&)            = delete;
         duplex_pipe& operator=(duplex_pipe const&) = delete;
 
-        // synchronous negotiation
-        bool negotiate();
-        
-        // asynchronous negotiation
-        auto negotiate_async();
+        // participates in move semantics
+        // TODO
 
-        auto read_message_async(
-            std::byte* buffer, 
-            std::size_t buffer_size
-            );
+        // listen
+        // Setup the local pipe instance for recieving connection request.
+        bool listen(std::wstring const& local_name);
 
-        auto write_message_async(
-            std::byte const* buffer, 
-            std::size_t buffer_size
-            );
+        // try_connect
+        // Attempt connection to remote pipe instance
+        bool try_connect(std::wstring const& remote_name);
 
-    private:
-        bool negotiate_client();
-        bool negotiate_server();
+        // accept_async
+        // Accept an incoming connection request asynchronously.
+        bool accept_async(LPOVERLAPPED ov);
 
-        // synchronous accept
-        bool accept();
-        // synchronous connect
-        bool connect();
+        HANDLE server_native_handle() const noexcept;
+        HANDLE client_native_handle() const noexcept;
     };
 
-    bool duplex_pipe::negotiate()
+    bool duplex_pipe::listen(std::wstring const& local_name)
     {
-        return m_type == pipe_type::client
-            ? negotiate_client()
-            : negotiate_server();
-    }
+        m_local_name = local_name;
 
-    auto duplex_pipe::negotiate_async()
-    {
-        return wincrt::create_task([this]()
-        {
-            return negotiate();
-        });
-    }
-
-    bool duplex_pipe::negotiate_client()
-    {
-        if (connect())
-        {
-            return accept();
-        }
-
-        return false;
-    }
-
-    bool duplex_pipe::negotiate_server()
-    {
-        if (accept())
-        {
-            return connect();
-        }
-
-        return false;
-    }
-
-    bool duplex_pipe::accept()
-    {
         m_recv_pipe = server_pipe
         {
             ::CreateNamedPipeW(
@@ -142,27 +73,32 @@ namespace wdl::ipc
             )
         };
 
-        if (!m_recv_pipe)
-        {
-            return false;
-        }
-
-        auto res = ::ConnectNamedPipe(m_recv_pipe.get(), nullptr);
-        return res;
+        // pipe handle provides explicit boolean operator
+        return static_cast<bool>(m_recv_pipe);
     }
 
-    bool duplex_pipe::connect()
+    bool duplex_pipe::accept_async(LPOVERLAPPED ov)
     {
-        if (!::WaitNamedPipeW(m_remote_name.c_str(), NMPWAIT_WAIT_FOREVER))
+        if (!m_recv_pipe)
         {
-            return false;
+            throw std::logic_error{"Must listen on local pipe instance prior to calling accept"};
         }
-        
-        m_send_pipe = client_pipe
+
+        return ::ConnectNamedPipe(m_recv_pipe.get(), ov);
+    }
+
+    bool duplex_pipe::try_connect(
+        std::wstring const& remote_name 
+        )
+    {
+        // NOTE: does not mess with WaitNamedPipe here
+
+        auto p = client_pipe
         {
             ::CreateFileW(
                 m_remote_name.c_str(),
-                GENERIC_READ | GENERIC_WRITE,
+                GENERIC_READ | 
+                GENERIC_WRITE,
                 0, nullptr,
                 OPEN_EXISTING,
                 FILE_FLAG_OVERLAPPED,
@@ -170,10 +106,13 @@ namespace wdl::ipc
             )
         };
 
-        if (!m_send_pipe)
+        if (!p)
         {
             return false;
         }
+
+        // take ownership of the successfully connected pipe
+        m_send_pipe = std::move(p);
 
         auto properties = unsigned long{PIPE_READMODE_MESSAGE | PIPE_WAIT};
         auto res = ::SetNamedPipeHandleState(
@@ -185,100 +124,15 @@ namespace wdl::ipc
         return res;
     }
 
-    auto duplex_pipe::read_message_async(
-        std::byte* buffer, 
-        std::size_t buffer_size
-        )
+    HANDLE duplex_pipe::server_native_handle() const noexcept
     {
-        return wincrt::create_task([=]()
-        {
-            auto bytes_read = 0ul;
-            ::ReadFile(
-                m_recv_pipe.get(),
-                static_cast<void*>(buffer),
-                static_cast<unsigned long>(buffer_size),
-                &bytes_read,
-                nullptr
-                );
-            
-            return static_cast<std::size_t>(bytes_read);
-        });
+        return m_recv_pipe.get();
     }
 
-    auto duplex_pipe::write_message_async(
-        std::byte const* buffer, 
-        std::size_t buffer_size
-        )
+    HANDLE duplex_pipe::client_native_handle() const noexcept
     {
-        return wincrt::create_task([=]()
-        {
-            auto bytes_written = 0ul;
-            ::WriteFile(
-                m_send_pipe.get(),
-                static_cast<void*>(const_cast<std::byte*>(buffer)),
-                static_cast<unsigned long>(buffer_size),
-                &bytes_written,
-                nullptr
-                );
-
-            return static_cast<std::size_t>(bytes_written);
-        });
+        return m_send_pipe.get();
     }
-
-    // wdl::ipc::pipe_negotiate
-    //
-    // Synchronous negotiation.
-
-    bool pipe_negotiate(duplex_pipe& pipe)
-    {
-        return pipe.negotiate();
-    }
-
-    // wdl::ipc::pipe_negotiate_async
-    //
-    // Asynchronous negotiation.
-
-    auto pipe_negotiate_async(duplex_pipe& pipe)
-    {
-        return pipe.negotiate_async();
-    }
-
-    // wdl::ipc::pipe_negotiate_async
-    //
-    // Asynchronous negotiation with callback function.
-
-    template <typename Handler>
-    auto pipe_negotiate_async(duplex_pipe& pipe, Handler fn)
-    {
-        return pipe.negotiate_async()
-        .then([&](bool success)
-        {
-            return success ? fn() : false;
-        });
-    }
-
-    // wdl::ipc::pipe_read_message_async
-
-    auto pipe_read_message_async(
-        duplex_pipe& pipe,
-        std::byte* buffer, 
-        std::size_t buffer_size
-        )
-    {
-        return pipe.read_message_async(buffer, buffer_size);
-    }
-
-    // wdl::ipc::pipe_write_message_async
-
-    auto pipe_write_message_async(
-        duplex_pipe& pipe,
-        std::byte const* buffer, 
-        std::size_t buffer_size
-        )
-    {
-        return pipe.write_message_async(buffer, buffer_size);
-    }
-
 }
 
 
