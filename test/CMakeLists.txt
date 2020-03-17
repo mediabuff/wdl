@@ -6,18 +6,17 @@ include(${CMAKE_SOURCE_DIR}/deps/catch2/contrib/Catch.cmake)
 add_library(catch_main STATIC catch_main.cpp)
 target_link_libraries(catch_main PUBLIC Catch2::Catch2)
 
+set(IO_SRCS
+    "io/iocp.cpp")
 set(SYNCHRONIZATION_SRCS
-    "synchronization/event.cpp"
-)
-
+    "synchronization/event.cpp")
 set(UTILITY_SRCS
-    "utility/unique_handle.cpp"
-)
+    "utility/unique_handle.cpp")
 
 add_executable(wdl_tests
+    ${IO_SRCS}
     ${SYNCHRONIZATION_SRCS}
-    ${UTILITY_SRCS}
-)
+    ${UTILITY_SRCS})
     
 target_link_libraries(wdl_tests PRIVATE catch_main wdl)
 

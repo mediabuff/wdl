@@ -1,4 +1,4 @@
-// mapped_file_test.cpp
+// mapped_file.cpp
 // Unit Test: wdl::io::mapped_file
 //
 // Demonstration of WDL utility for simplified memory-mapped file API.
