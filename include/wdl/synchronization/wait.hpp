@@ -1,38 +1,52 @@
-// wait.h
+// wait.hpp
+//
 // Free Function Implementations:
-//	wait_one()
-//	wait_all()
-//	wait_array()
+//	- wdl::synchronization::wait_one()
+//	- wdl::synchronization::wait_all()
+//	- wdl::synchronization::wait_array()
 //
 // Synchronization utilties.
 
 #pragma once
 
 #include <windows.h>
-
-#include "wdl/debug/debug.hpp"
+#include <wdl/debug/debug.hpp>
 
 namespace wdl::synchronization
 {
-	// wait_one
+	namespace detail
+	{
+		void pack(HANDLE*) {}
+
+		template <typename T, typename... Args>
+		void pack(
+			HANDLE* left,
+			T const& right,
+			Args const&... args
+		)
+		{
+			*left = right.get();
+			pack(++left, args...);
+		}
+	}
+
+	// wdl::synchronization::wait_one()
 	//
 	// Simple wrapper around object wait for dispatcher objects.
 
 	void wait_one(
-		const HANDLE handle, 
-		const unsigned long timeout = INFINITE
-		)
-	{
-		VERIFY_(
-			WAIT_OBJECT_0,
-			::WaitForSingleObject(handle, timeout)
+		HANDLE const handle, 
+		unsigned long const timeout = INFINITE
 		);
-	}
+
+	// wdl::synchronization::wait_one()
+	//
+	// Overload that accepts WDL synchronization types.
 
 	template <typename T>
 	void wait_one(
-		const T& arg, 
-		const unsigned long timeout = INFINITE
+		T const& arg, 
+		unsigned long const timeout = INFINITE
 		)
 	{
 		VERIFY_(
@@ -41,30 +55,17 @@ namespace wdl::synchronization
 		);
 	}
 
-	// wait_all
+	// wdl::synchronization::wait_all()
 	//
 	// Variadic template for simplifying dispatcher object waits.
 
-	void pack(HANDLE*) {}
-
-	template <typename T, typename... Args>
-	void pack(
-		HANDLE* left,
-		const T& right,
-		const Args&... args
-	)
-	{
-		*left = right.get();
-		pack(++left, args...);
-	}
-
 	template <typename... Args>
-	void wait_all(const Args&... args)
+	void wait_all(Args const&... args)
 	{
 		HANDLE handles[sizeof...(Args)];
 
 		// pack dispatcher object handles into array
-		pack(handles, args...);
+		detail::pack(handles, args...);
 
 		VERIFY_(
 			WAIT_OBJECT_0,
@@ -72,15 +73,12 @@ namespace wdl::synchronization
 		);
 	}
 
-	// wait_array
+	// wdl::synchronization::wait_handles()
 	//
 	// Simple wrapper around object wait for dispatcher objects.
 
-	void wait_array(const HANDLE handles[], const unsigned size)
-	{
-		VERIFY_(
-			WAIT_OBJECT_0,
-			::WaitForMultipleObjects(size, handles, true, INFINITE)
+	void wait_handles(
+		HANDLE const handles[], 
+		unsigned const size
 		);
-	}
 }

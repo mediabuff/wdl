@@ -1,4 +1,5 @@
-// mutex.h
+// mutex.hpp
+//
 // Class Implementation: wdl::synchronization::mutex
 //
 // Windows Mutex object wrapper.
@@ -8,37 +9,32 @@
 #include <windows.h>
 #include <string>
 
-#include "wdl/utility/exception.hpp"
-#include "wdl/utility/unique_handle.hpp"
+#include <wdl/utility/exception.hpp>
+#include <wdl/utility/unique_handle.hpp>
 
 using wdl::utility::null_handle;
 using wdl::utility::windows_exception;
 
 namespace wdl::synchronization
 {
-	// mutex
+	// wdl::synchronization::mutex
 	//
 	// Windows Mutex object wrapper.
 
 	class mutex
 	{
+		using null_handle_t = wdl::utility::null_handle;
+
+		null_handle_t m_handle;
+
+	public:
 		mutex()
 			: m_lock{ ::CreateMutexW(nullptr, false, nullptr) }
-		{
-			if (!m_lock)
-			{
-				throw windows_exception{};
-			}
-		}
+		{}
 
 		explicit mutex(const std::wstring& name)
 			: m_lock{ ::CreateMutexW(nullptr, false, name.c_str()) }
-		{
-			if (!m_lock)
-			{
-				throw windows_exception();
-			}
-		}
+		{}
 
 		// rely on unique_handle semantics for release
 		~mutex() = default;
@@ -62,8 +58,5 @@ namespace wdl::synchronization
 		{
 			return m_lock.get();
 		}
-
-	private:
-		null_handle m_lock;
 	};
 }

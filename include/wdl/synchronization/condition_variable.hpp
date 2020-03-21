@@ -1,4 +1,5 @@
-// condition_variable.h
+// condition_variable.hpp
+//
 // Class Implementation: wdl::synchronization::condition_variable
 //
 // Windows Condition Variable wrapper.
@@ -7,16 +8,16 @@
 
 #include <windows.h>
 
-#include "wdl/debug/debug.hpp"
-#include "wdl/synchronization/slim_lock.hpp"
-#include "wdl/synchronization/critical_section.hpp"
+#include <wdl/debug.hpp>
+#include <wdl/synchronization/slim_lock.hpp>
+#include <wdl/synchronization/critical_section.hpp>
 
 using wdl::synchronization::slim_lock;
 using wdl::synchronization::critical_section;
 
 namespace wdl::synchronization
 {
-	// condition_variable
+	// wdl::synchronization::condition_variable
 	//
 	// Windows Condition Variable wrapper.
 

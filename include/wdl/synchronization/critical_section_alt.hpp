@@ -1,4 +1,5 @@
 // critical_section_alt.hpp
+//
 // Class Implementation: wdl::synchronization::critical_section_alt
 //
 // Alternative implementation of critical section wrapper that 

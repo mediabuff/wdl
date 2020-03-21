@@ -1,4 +1,5 @@
-// slim_lock.h
+// slim_lock.hpp
+//
 // Class Implementations:
 //	wdl::synchronization::slim_lock
 //	wdl::synchronization::slim_auto_lock
@@ -11,7 +12,7 @@
 
 namespace wdl::synchronization
 {
-	// slim_auto_lock
+	// wdl::synchronization::slim_auto_lock
 	//
 	// An RAII-based scoped lock with semantics that are
 	// approriate for wrapping slim_lock objects.
@@ -44,12 +45,14 @@ namespace wdl::synchronization
 		UnlockAction m_action;
 	};
 
-	// slim_lock
+	// wdl::synchronization::slim_lock
 	//
 	// Windows Slim Reader/Writer lock wrapper.
 
 	class slim_lock
 	{
+		SRWLOCK m_lock{};
+
 	public:
 		slim_lock() noexcept
 			: m_lock{ SRWLOCK_INIT }
@@ -98,8 +101,5 @@ namespace wdl::synchronization
 		{
 			return &m_lock;
 		}
-
-	private:
-		SRWLOCK m_lock{};
 	};
 }

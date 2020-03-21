@@ -1,4 +1,5 @@
-// event.h
+// event.hpp
+//
 // Class Implementation: wdl::synchronization::event
 //
 // Windows Event object wrapper.
@@ -7,16 +8,12 @@
 
 #include <windows.h>
 
-#include "wdl/debug/debug.hpp"
-#include "wdl/utility/exception.hpp"
-#include "wdl/utility/unique_handle.hpp"
-
-using wdl::utility::null_handle;
-using wdl::utility::windows_exception;
+#include <wdl/debug.hpp>
+#include <wdl/handle.hpp>
 
 namespace wdl::synchronization
 {
-	// event_type
+	// wdl::synchronization::event_type
 	//
 	// Windows event type enumeration.
 
@@ -26,15 +23,19 @@ namespace wdl::synchronization
 		manual_reset
 	};
 
-	// event
+	// wdl::synchronization::event
 	//
 	// WDL wrapper around Windows events implementing RAII.
 
 	class event
-	{
+	{	
+		using null_handle_t = wdl::handle::null_handle;
+
+		null_handle_t m_handle;
+
 	public:
 		explicit event(event_type type)
-			: handle{ ::CreateEvent(nullptr, static_cast<bool>(type), false, nullptr) }
+			: m_handle{ ::CreateEvent(nullptr, static_cast<bool>(type), false, nullptr) }
 		{}
 
 		// rely on destructor for null_handle to clean up
@@ -44,14 +45,14 @@ namespace wdl::synchronization
 		event& operator=(event&) = delete;
 
 		event(event&& other) noexcept
-			: handle{ other.handle.release() }
+			: m_handle{ other.m_handle.release() }
 		{}
 
 		event& operator=(event&& rhs) noexcept
 		{
 			if (this != &rhs)
 			{
-				handle = std::move(rhs.handle);
+				m_handle = std::move(rhs.m_handle);
 			}
 			
 			return *this;
@@ -59,17 +60,17 @@ namespace wdl::synchronization
 
 		void set() noexcept
 		{
-			VERIFY(::SetEvent(handle.get()));
+			VERIFY(::SetEvent(m_handle.get()));
 		}
 
 		void reset() noexcept
 		{
-			VERIFY(::ResetEvent(handle.get()));
+			VERIFY(::ResetEvent(m_handle.get()));
 		}
 
 		bool wait(const unsigned long ms = INFINITE) noexcept
 		{
-			const auto res = ::WaitForSingleObject(handle.get(), ms);
+			const auto res = ::WaitForSingleObject(m_handle.get(), ms);
 
 			ASSERT(res == WAIT_OBJECT_0 || res == WAIT_TIMEOUT);
 
@@ -78,20 +79,17 @@ namespace wdl::synchronization
 
 		HANDLE get() const noexcept
 		{
-			return handle.get();
+			return m_handle.get();
 		}
 
 		bool valid() const noexcept
 		{
-			return handle ? true : false;
+			return m_handle ? true : false;
 		}
 
 		explicit operator bool()
 		{
-			return handle ? true : false; 
+			return m_handle ? true : false; 
 		}
-
-	private:
-		null_handle handle;
 	};
 }

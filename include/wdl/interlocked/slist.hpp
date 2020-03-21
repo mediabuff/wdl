@@ -1,4 +1,5 @@
 // slist.hpp
+//
 // Class Implementation: wdl::interlocked::slist
 //
 // Wrapper class around Windows lock-free singly-linked list.

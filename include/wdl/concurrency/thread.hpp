@@ -1,4 +1,5 @@
-// thread.h
+// thread.hpp
+//
 // Class Implementation: wdl::concurrency::thread
 //
 // Windows threading utilities.
@@ -6,14 +7,13 @@
 #pragma once
 
 #include <windows.h>
-
-#include "wdl/utility/unique_handle.hpp"
-
-using wdl::utility::null_handle;
+#include <wdl/utility/unique_handle.hpp>
 
 namespace wdl::concurrency
 {
 	using thread_callback = void (*)();
+
+	using null_handle_t = wdl::utility::null_handle;
 
 	unsigned long thread_wrapper(void* arg)
 	{
@@ -25,9 +25,9 @@ namespace wdl::concurrency
 	}
 
 	template <typename F>
-	null_handle make_thread(F callback) noexcept
+	null_handle_t make_thread(F callback) noexcept
 	{
-		return null_handle
+		return null_handle_t
 		{
 			::CreateThread(
 				nullptr,

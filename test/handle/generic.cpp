@@ -1,14 +1,15 @@
-// unique_handle.cpp
+// generic.cpp
+//
 // Unit Test: wdl::utility::unique_handle
 
 #include <catch2/catch.hpp>
-#include <wdl/utility/unique_handle.hpp>
+#include <wdl/handle.hpp>
 
 #include <windows.h>
 
 TEST_CASE("wdl::utility::unique_handle lifetime semantics")
 {
-	using wdl::utility::null_handle;
+	using wdl::handle::null_handle;
 
 	auto src = null_handle{ ::CreateEvent(nullptr, false, false, nullptr) };
 

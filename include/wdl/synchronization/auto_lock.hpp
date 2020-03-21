@@ -1,4 +1,5 @@
-// auto_lock.h
+// auto_lock.hpp
+//
 // Class Implementation: wdl::synchronization::auto_lock
 //
 // Scoped-based lock wrapper.
@@ -7,7 +8,7 @@
 
 namespace wdl::synchronization
 {
-	// auto_lock
+	// wdl::synchronization::auto_lock
 	//
 	// RAII-based scoped lock wrappper.
 

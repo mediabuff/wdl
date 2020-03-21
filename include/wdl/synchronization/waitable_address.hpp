@@ -1,4 +1,5 @@
 // waitable_address.hpp
+//
 // Class Implementation: cdl::synchronization::waitable_address
 //
 // Wrapper class around Windows WaitForAddress() synchronization mechanism.

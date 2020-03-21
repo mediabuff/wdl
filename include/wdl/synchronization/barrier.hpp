@@ -1,4 +1,5 @@
 // barrier.hpp
+//
 // Class Implementation: wdl::synchronization::barrier
 //
 // Wrapper around Windows SYNCHRONIZATION_BARRIER type.
@@ -9,7 +10,7 @@
 
 namespace wdl::synchronization
 {
-    // barrier
+    // wdl::synchronization::barrier
     //
     // Simple RAII wrapper around Windows built-in type.
 

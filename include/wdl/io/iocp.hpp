@@ -5,7 +5,7 @@
 #pragma once
 
 #include <windows.h>
-#include <wdl/utility/unique_handle.hpp>
+#include <wdl/handle.hpp>
 
 #include <thread>
 
@@ -17,7 +17,7 @@ namespace wdl::io
 
     class iocp
     {
-        using null_handle_t = wdl::utility::null_handle;
+        using null_handle_t = wdl::handle::null_handle;
 
         null_handle_t m_port;
 

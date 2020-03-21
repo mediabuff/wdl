@@ -1,4 +1,5 @@
-// critical_section.h
+// critical_section.hpp
+//
 // Class Implementation: wdl::synchronization::critical_section
 // 
 // Windows Critical Section object wrapper
@@ -10,7 +11,7 @@
 namespace wdl::synchronization
 {
 
-	// critical_section
+	// wdl::synchronization::critical_section
 	//
 	// Windows Critical Section type wrapper.
 

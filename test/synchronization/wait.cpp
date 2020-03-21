@@ -1,56 +1,36 @@
 // wait.cpp
-// Unit Test: wdl::synchronization::wait_all
+//
+// Unit Test:
+//	- wdl::synchronization::wait() 
+//	- wdl::synchronization::wait_all()
+// 	- wdl::synchronization::wait_handles()
 //
 // Demonstration of dispatcher object synchronization with WDL.
-//
-// Build
-//	cl /EHsc /nologo /std:c++17 /W4 /I C:\Dev\WDL wait_test.cpp
 
-#include <windows.h>
-#include <process.h>
-#include <cstdio>
+#include <catch2/catch.hpp>
+
 #include <thread>
-#include <chrono>
-#include <sstream>
 
-#include "wdl/synchronization/wait.hpp"
-#include "wdl/utility/unique_handle.hpp"
+#include <wdl/debug/debug.hpp>
+#include <wdl/synchronization/wait.hpp>
+#include <wdl/utility/unique_handle.hpp>
 
-constexpr auto STATUS_SUCCESS_I = 0x0;
-constexpr auto STATUS_FAILURE_I = 0x1;
-
-unsigned int __stdcall work()
+void async_work(HANDLE h, bool& flag)
 {
-	using namespace std::chrono_literals;
-
-	const auto tid = ::GetCurrentThreadId();
-
-	printf("[%u] Enter\n", tid);
-
-	std::this_thread::sleep_for(2s);
-
-	printf("[%u] Exit\n", tid);
-
-	return STATUS_SUCCESS_I;
+	flag = true;
+	VERIFY(::SetEvent(h));
 }
 
-int main()
+TEST_CASE("wdl::synchronization::wait() supports wait on single Windows handle")
 {
-	auto t1 = wdl::utility::null_handle
-	{
-		reinterpret_cast<HANDLE>(
-			_beginthreadex(nullptr, 0, work, nullptr, 0, nullptr)
-		)
-	};
+	auto handle = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
+	REQUIRE(handle != NULL);
 
-	auto t2 = wdl::utility::null_handle
-	{
-		reinterpret_cast<HANDLE>(
-			_beginthreadex(nullptr, 0, work, nullptr, 0, nullptr)
-		)
-	};
+	auto flag = bool{false};
 
-	wdl::synchronization::wait_all(t1, t2);
+	auto thread = std::thread{async_work, handle, std::ref(flag)};
 
-	return STATUS_SUCCESS_I;
+	wdl::synchronization::wait_one(handle);
+
+	REQUIRE(flag);
 }

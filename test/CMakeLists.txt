@@ -10,8 +10,8 @@ set(IO_SRCS
     "io/iocp.cpp")
 set(SYNCHRONIZATION_SRCS
     "synchronization/event.cpp")
-set(UTILITY_SRCS
-    "utility/unique_handle.cpp")
+set(HANDLE_SRCS
+    "handle/generic.cpp")
 
 add_executable(wdl_tests
     ${IO_SRCS}

@@ -1,5 +1,6 @@
-// debug.h
-// Various debugging utilities.
+// debug.hpp
+//
+// Windows debugging utilities.
 
 #pragma once
 

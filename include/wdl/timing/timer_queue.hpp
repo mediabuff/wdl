@@ -1,5 +1,6 @@
 // timer_queue.hpp
-// Class Implementation: wdl::timing::timer_queue.hpp
+//
+// Class Implementation: wdl::timing::timer_queue
 //
 // Wrapper around Windows timer queue.
 
@@ -12,7 +13,7 @@
 
 namespace wdl::timing
 {
-    // timer_queue
+    // wdl::timing::timer_queue
 
     class timer_queue
     {
