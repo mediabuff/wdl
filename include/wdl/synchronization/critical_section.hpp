@@ -1,8 +1,6 @@
 // critical_section.hpp
 //
 // Class Implementation: wdl::synchronization::critical_section
-// 
-// Windows Critical Section object wrapper
 
 #pragma once
 
@@ -18,22 +16,22 @@ namespace wdl::synchronization
 	class critical_section
 	{
 
-		CRITICAL_SECTION m_lock;
+		CRITICAL_SECTION m_handle;
 
 	public:
 		critical_section() noexcept
 		{
-			::InitializeCriticalSection(&m_lock);
+			::InitializeCriticalSection(&m_handle);
 		}
 
 		critical_section(unsigned long spin_count) noexcept
 		{
-			::InitializeCriticalSectionAndSpinCount(&m_lock, spin_count);
+			::InitializeCriticalSectionAndSpinCount(&m_handle, spin_count);
 		}
 
 		~critical_section() noexcept
 		{
-			::DeleteCriticalSection(&m_lock);
+			::DeleteCriticalSection(&m_handle);
 		}
 
 		critical_section(const critical_section& other)          = delete;
@@ -43,17 +41,17 @@ namespace wdl::synchronization
 
 		void enter() noexcept
 		{
-			::EnterCriticalSection(&m_lock);
+			::EnterCriticalSection(&m_handle);
 		}
 
 		void exit() noexcept
 		{
-			::LeaveCriticalSection(&m_lock);
+			::LeaveCriticalSection(&m_handle);
 		}
 
 		LPCRITICAL_SECTION native_handle() noexcept
 		{
-			return &m_lock;
+			return &m_handle;
 		}
 	};
 }

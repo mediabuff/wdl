@@ -1,37 +1,47 @@
 // critical_section.cpp
+//
 // Unit Test: wdl::synchronization::critical_section
-//
-// Demonstration of use of critical section wrapper.
-//
-// Build
-//  cl /EHsc /nologo /std:c++17 /W4 /I C:\Dev\WDL critical_section_test.cpp
+
+#include <catch2/catch.hpp>
+#include <wdl/synchronization/critical_section.hpp>
 
 #include <thread>
-#include <chrono>
-#include <iostream>
+#include <vector>
 
-#include "wdl/synchronization/critical_section.hpp"
+constexpr auto N_THREADS             = 5;
+constexpr auto ITERATIONS_PER_THREAD = 10000;
 
-unsigned long long g_data = 0;
-wdl::synchronization::critical_section g_critical_section{};
-
-void worker()
+void worker(
+    wdl::synchronization::critical_section& critical_section, 
+    unsigned long long& count
+    )
 {
-    for (auto i = 0; i < 10000; ++i)
+    for (auto i = 0u; i < ITERATIONS_PER_THREAD; ++i)
     {
-        g_critical_section.enter();
-        g_data++;
-        g_critical_section.exit();
+        critical_section.enter();
+        ++count;
+        critical_section.exit();
     }
 }
 
-int main()
+TEST_CASE("wdl::synchronization::critical_section protects shared data access")
 {
-    auto t1 = std::thread{worker};
-    auto t2 = std::thread{worker};
+    auto critical_section = wdl::synchronization::critical_section{};
 
-    t1.join();
-    t2.join();
+    // no need to check for successful initialization; not a kernel object
 
-    std::cout << "Total Count: " << g_data << std::endl;
+    auto count = unsigned long long{};
+
+    auto threads = std::vector<std::thread>{};
+    for (auto i = 0u; i < N_THREADS; ++i)
+    {
+        threads.emplace_back(worker, std::ref(critical_section), std::ref(count));
+    }
+
+    for (auto& t : threads)
+    {
+        t.join();
+    }
+
+    REQUIRE(count == N_THREADS*ITERATIONS_PER_THREAD);
 }
