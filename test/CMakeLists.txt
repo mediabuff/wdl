@@ -9,9 +9,11 @@ target_link_libraries(catch_main PUBLIC Catch2::Catch2)
 set(IO_SRCS
     "io/iocp.cpp")
 set(SYNCHRONIZATION_SRCS
+    "synchronization/barrier.cpp"
     "synchronization/critical_section.cpp"
     "synchronization/event.cpp"
-    "synchronization/mutex.cpp")
+    "synchronization/mutex.cpp"
+    "synchronization/slim_lock.cpp")
 set(HANDLE_SRCS
     "handle/generic.cpp")
 

@@ -1,51 +1,52 @@
 // barrier.cpp
-// Unit Test: wdl::synchronization::barrier
 //
-// Build
-//  cl /EHsc /nologo /std:c++17 /W4 /I C:\Dev\WDL barrier_test.cpp
+// Unit Test: wdl::synchronization::barrier
+
+#include <catch2/catch.hpp>
+#include <wdl/synchronization/barrier.hpp>
 
 #include <thread>
+#include <atomic>
 #include <vector>
-#include <chrono>
-#include <cstdio>
-
-#include "wdl/synchronization/barrier.hpp"
 
 constexpr auto N_THREADS = 10;
 
-wdl::synchronization::barrier g_barrier{N_THREADS};
-
-void worker(unsigned long id)
+void worker(
+    wdl::synchronization::barrier& barrier,
+    std::atomic_long& count1,
+    std::atomic_long& count2
+    )
 {
-    using namespace std::chrono_literals;
+    ++count1;
+    barrier.enter();
 
-    printf("[%u] Begin Phase 1\n", id);
-
-    std::this_thread::sleep_for(3s);
-
-    printf("[%u] End Phase 1\n", id);
-
-    g_barrier.enter();
-
-    printf("[%u] Begin Phase 2\n", id);
-
-    std::this_thread::sleep_for(2s);
-
-    printf("[%u] End Phase 2\n", id);
-
-    g_barrier.enter();
-
-    printf("[%u] Exit\n", id);
+    ++count2;
+    barrier.enter();
 }
 
-int main()
-{
-    std::vector<std::thread> threads{};
+TEST_CASE("wdl::synchronization::barrier synchronizes thread activity")
+{   
+    auto count1  = std::atomic_long{};
+    auto count2  = std::atomic_long{};
 
+    auto barrier = wdl::synchronization::barrier{N_THREADS+1};
+
+    auto threads = std::vector<std::thread>{};
     for (unsigned long id = 0; id < N_THREADS; ++id)
     {
-        threads.emplace_back(worker, id);
+        threads.emplace_back(
+            worker, 
+            std::ref(barrier), 
+            std::ref(count1), 
+            std::ref(count2)
+            );
     }
+
+    barrier.enter();
+    REQUIRE(count1.load() == N_THREADS);
+
+    barrier.enter();
+    REQUIRE(count2.load() == N_THREADS);
 
     for (auto& t : threads)
     {

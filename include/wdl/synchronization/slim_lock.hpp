@@ -35,10 +35,11 @@ namespace wdl::synchronization
 			(m_lock.*m_action)();
 		}
 
-		slim_auto_lock(const T& other) = delete;
-		slim_auto_lock(T&& other) = delete;
-		T& operator=(const T& rhs) = delete;
-		T& operator=(T&& rhs) = delete;
+		slim_auto_lock(T const&) = delete;
+		T& operator=(T const&)   = delete;
+		
+		slim_auto_lock(T&&)      = delete;
+		T& operator=(T&&)        = delete;
 
 	private:
 		T&           m_lock;
@@ -61,8 +62,8 @@ namespace wdl::synchronization
 		~slim_lock() = default;
 
 		slim_lock(const slim_lock& other)          = delete;
-		slim_lock(slim_lock&& other)               = delete;
 		slim_lock& operator=(const slim_lock& rhs) = delete;
+		slim_lock(slim_lock&& other)               = delete;
 		slim_lock& operator=(slim_lock&& rhs)      = delete;
 
 		void enter() noexcept

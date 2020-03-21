@@ -1,64 +1,79 @@
 // slim_lock.cpp
+//
 // Unit Test: wdl::synchronization::slim_lock
-//
-// Demonstration of WDL library use with Windows SRW locks.
-//
-// Build
-//	cl /EHsc /nologo /std:c++17 /W4 /I C:\Dev\WDL slim_lock_test.cpp
 
-#include <windows.h>
-#include <cstdio>
+#include <catch2/catch.hpp>
+#include <wdl/synchronization/slim_lock.hpp>
+
+#include <vector>
 #include <thread>
-#include <chrono>
 
-#include "wdl/concurrency/thread.hpp"
-#include "wdl/synchronization/wait.hpp"
-#include "wdl/synchronization/slim_lock.hpp"
+constexpr auto N_THREADS             = 5;
+constexpr auto ITERATIONS_PER_THREAD = 10000;
 
-auto g_lock   = wdl::synchronization::slim_lock{};
-auto g_shared = int{};
-
-void reader() noexcept
+void exclusive_worker(
+	wdl::synchronization::slim_lock& lock,
+	unsigned long long& count
+	)
 {
-	using namespace std::chrono_literals;
-
-	for (;;)
+	for (auto i = 0u; i < ITERATIONS_PER_THREAD; ++i)
 	{
-		std::this_thread::sleep_for(10ms);
-
-		auto guard = g_lock.get_shared();
-
-		std::this_thread::sleep_for(500ms);
-
-		if (g_shared < 5)
-		{
-			printf("shared=%d; id=%u\n", g_shared, wdl::concurrency::thread_id());
-		}
-		else
-		{
-			break;
-		}
+		lock.enter();
+		++count;
+		lock.exit();
 	}
 }
 
-int main()
+TEST_CASE("wdl::synchronization::slim_lock protects shared data reads in exclusive mode")
 {
-	using namespace std::chrono_literals;
+	auto slim_lock = wdl::synchronization::slim_lock{};
 
-	auto r1 = wdl::concurrency::make_thread(reader);
-	auto r2 = wdl::concurrency::make_thread(reader);
+	auto count = unsigned long long{};
 
-	auto w = wdl::concurrency::make_thread([]
+	auto threads = std::vector<std::thread>{};
+	for (auto i = 0u; i < N_THREADS; ++i)
 	{
-		for (unsigned i = 0; i < 5; ++i)
-		{
-			std::this_thread::sleep_for(1s);
-			auto gaurd = g_lock.get_exclusive();
+		threads.emplace_back(exclusive_worker, std::ref(slim_lock), std::ref(count));
+	}
 
-			++g_shared;
-		}
-	});
+	for (auto& t : threads)
+	{
+		t.join();
+	}
 
-	wdl::synchronization::wait_all(r1, r2, w);
+	REQUIRE(count == N_THREADS*ITERATIONS_PER_THREAD);
+}
+
+
+void exclusive_worker_auto(
+	wdl::synchronization::slim_lock& lock,
+	unsigned long long& count
+	)
+{
+	for (auto i = 0u; i < ITERATIONS_PER_THREAD; ++i)
+	{
+		auto guard = lock.get_exclusive();
+		++count;
+	}
+}
+
+TEST_CASE("wdl::synchronization::slim_auto_lock provides scope-based mutual exclusion")
+{
+	auto slim_lock = wdl::synchronization::slim_lock{};
+
+	auto count = unsigned long long{};
+
+	auto threads = std::vector<std::thread>{};
+	for (auto i = 0u; i < N_THREADS; ++i)
+	{
+		threads.emplace_back(exclusive_worker, std::ref(slim_lock), std::ref(count));
+	}
+
+	for (auto& t : threads)
+	{
+		t.join();
+	}
+
+	REQUIRE(count == N_THREADS*ITERATIONS_PER_THREAD);
 }
 
