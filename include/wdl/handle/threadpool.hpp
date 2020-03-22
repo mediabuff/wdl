@@ -29,12 +29,12 @@ namespace wdl::handle
         }
     };
 
-    // wdl::handle::work_handle_traits
+    // wdl::handle::tp_work_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows thread pool work object.
 
-    struct work_handle_traits
+    struct tp_work_handle_traits
     {
         using pointer = PTP_WORK;
 
@@ -45,15 +45,39 @@ namespace wdl::handle
 
         static void close(pointer value) noexcept
         {
+            // by default, does not cancel outstanding work
+            ::WaitForThreadpoolWorkCallbacks(value, FALSE);
             ::CloseThreadpoolWork(value);
         }
     };
 
-    // wdl::handle::wait_handle_traits
+    // wdl::threadpool::tp_io_handle_traits
+    //
+    // Traits definition appropriate for use
+    // with Windows threadpool IO objects.
+
+    struct tp_io_handle_traits
+    {
+        using pointer = PTP_IO;
+
+        constexpr static pointer invalid() noexcept
+        {
+            return nullptr;
+        }
+
+        static void close(pointer value) noexcept
+        {
+            // by default, does not cancel outstanding operations
+            ::WaitForThreadpoolIoCallbacks(value, FALSE);
+            ::CloseThreadpoolIo(value);
+        }
+    };
+
+    // wdl::handle::tp_wait_handle_traits
     // Traits definition appropriate for use
     // with Windows thread pool wait objects.
 
-    struct wait_handle_traits
+    struct tp_wait_handle_traits
     {
         using pointer = PTP_WAIT;
 
@@ -64,16 +88,18 @@ namespace wdl::handle
 
         static void close(pointer value) noexcept
         {
+            // by default, does not cancel outstanding waits
+            ::WaitForThreadpoolWaitCallbacks(value, FALSE);
             ::CloseThreadpoolWait(value);
         }
     };
 
-    // wdl::handle::timer_handle_traits
+    // wdl::handle::tp_timer_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows thread pool timer object.
 
-    struct timer_handle_traits
+    struct tp_timer_handle_traits
     {
         using pointer = PTP_TIMER;
 
@@ -84,16 +110,18 @@ namespace wdl::handle
 
         static void close(pointer value) noexcept
         {
+            // by default, does not cancel outstanding timers
+            ::WaitForThreadpoolTimerCallbacks(value, FALSE);
             ::CloseThreadpoolTimer(value);
         }
     };
 
-    // wdl::handle::cleanup_group_traits
+    // wdl::handle::tp_cleanup_group_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows thread pool cleanup group object.
 
-    struct cleanup_group_traits
+    struct tp_cleanup_group_handle_traits
     {
         using pointer = PTP_CLEANUP_GROUP;
 

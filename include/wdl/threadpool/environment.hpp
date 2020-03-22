@@ -26,14 +26,15 @@ namespace wdl::threadpool
 			::DestroyThreadpoolEnvironment(&m_handle);
 		}
 
-		PTP_CALLBACK_ENVIRON get() noexcept
-		{
-			return &m_handle;
-		}
-
+		// non-copyable, non-movable
 		environment(const environment& other)          = delete;
 		environment(environment&& other)               = delete;
 		environment& operator=(const environment& rhs) = delete;
 		environment& operator=(environment& rhs)       = delete;
+
+		PTP_CALLBACK_ENVIRON get() noexcept
+		{
+			return &m_handle;
+		}
 	};
 }

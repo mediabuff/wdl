@@ -17,10 +17,11 @@ namespace wdl::handle
     using reg_handle       = unique_handle<registry_handle_traits>;
     using winhttp_handle   = unique_handle<winhttp_handle_traits>;
     using pool_handle      = unique_handle<pool_handle_traits>;
-    using work_handle      = unique_handle<work_handle_traits>;
-    using wait_handle      = unique_handle<wait_handle_traits>;
-    using timer_handle     = unique_handle<timer_handle_traits>;
-    using cleanup_group    = unique_handle<cleanup_group_traits>;
+    using work_handle      = unique_handle<tp_work_handle_traits>;
+    using wait_handle      = unique_handle<tp_wait_handle_traits>;
+    using timer_handle     = unique_handle<tp_timer_handle_traits>;
+    using io_handle        = unique_handle<tp_io_handle_traits>;
+    using cleanup_group    = unique_handle<tp_cleanup_group_handle_traits>;
     using provider_handle  = unique_handle<provider_handle_traits>;
     using hash_handle      = unique_handle<hash_handle_traits>;
     using key_handle       = unique_handle<key_handle_traits>;

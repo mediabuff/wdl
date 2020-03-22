@@ -33,17 +33,17 @@ namespace wdl::synchronization
 		using null_handle_t = wdl::handle::null_handle;
 
 		null_handle_t m_handle;
-		bool          m_created_new;
+		bool          m_new_instance;
 
 	public:
 		explicit event(event_type type)
 			: m_handle{ ::CreateEventW(nullptr, static_cast<bool>(type), false, nullptr) }
-			, m_created_new{ true }
+			, m_new_instance{ true }
 		{}
 
 		event(event_type type, std::wstring const& name)
 			: m_handle{ ::CreateEventW(nullptr, static_cast<bool>(type), false, name.c_str()) }
-			, m_created_new{ !(::GetLastError() == ERROR_ALREADY_EXISTS) }
+			, m_new_instance{ ::GetLastError() == ERROR_SUCCESS }
 		{}
 
 		// rely on destructor for null_handle to clean up
@@ -92,17 +92,17 @@ namespace wdl::synchronization
 
 		bool is_new_instance() const noexcept
 		{
-			return static_cast<bool>(m_handle) && m_created_new;
+			return m_new_instance;
 		}
 
 		bool is_valid() const noexcept
 		{
-			return m_handle ? true : false;
+			return static_cast<bool>(m_handle);
 		}
 
-		explicit operator bool()
+		explicit operator bool() const noexcept
 		{
-			return m_handle ? true : false; 
+			return static_cast<bool>(m_handle); 
 		}
 	};
 }

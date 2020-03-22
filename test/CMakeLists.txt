@@ -18,12 +18,15 @@ set(SYNCHRONIZATION_SRCS
     "synchronization/slim_lock.cpp")
 set(THREAD_SRCS
     "thread/thread.cpp")
+set(THREADPOOL_SRCS
+    "threadpool/pool.cpp")
 
 add_executable(wdl_test_suite
     ${HANDLE_SRCS}
     ${IO_SRCS}
     ${SYNCHRONIZATION_SRCS}
-    ${THREAD_SRCS})
+    ${THREAD_SRCS}
+    ${THREADPOOL_SRCS})
     
 target_link_libraries(wdl_test_suite PRIVATE catch_main wdl)
 
