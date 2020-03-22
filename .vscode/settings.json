@@ -4,6 +4,7 @@
         "ostream": "cpp",
         "functional": "cpp",
         "xstring": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "chrono": "cpp"
     }
 }

@@ -5,10 +5,13 @@
 #pragma once
 
 #include <windows.h>
+#include <chrono>
+
+#include <wdl/handle.hpp>
+#include <wdl/timing/filetime.hpp>
 
 #include "environment.hpp"
 #include "cleanup_group.hpp"
-#include <wdl/handle.hpp>
 
 namespace wdl::threadpool
 {
@@ -139,7 +142,35 @@ namespace wdl::threadpool
 			return wait_object;	
 		}
 
+		template <typename DurationType>
+		PTP_WAIT submit_wait(
+			HANDLE            handle,
+			DurationType      timeout, 
+			wait_completion_f fn
+			)
+		{
+			auto wait_object = ::CreateThreadpoolWait(
+				wait_completion_trampoline,
+				static_cast<void*>(fn),
+				m_environment.get()
+				);
+
+			if (wait_object != NULL)
+			{
+				auto ft = wdl::timing::to_filetime<DurationType>(duration);
+				::SetThreadpoolWait(wait_object, handle, &ft);
+			}
+
+			return wait_object;	
+		}
+
+		template <typename DueDuration, 
+				  typename PeriodDuration, 
+				  typename WindowDuration>
 		PTP_TIMER submit_timer(
+			DueDuration        due_time,
+			PeriodDuration     period,
+			WindowDuration     window,
 			timer_completion_f fn
 		)
 		{
@@ -151,11 +182,16 @@ namespace wdl::threadpool
 
 			if (timer_object != NULL)
 			{
-				// TODO: actually implement this
+				auto ft = wdl::timing::to_filetime<DueDuration>(due_time);
+				auto p = std::chrono::duration_cast<std::chrono::milliseconds>(period).count();
+				auto w = std::chrono::duration_cast<std::chrono::milliseconds>(window).count();
+
+				// TODO: explicit narrowing conversions
 				::SetThreadpoolTimer(
 					timer_object,
-					NULL,
-					0, 0
+					&ft,
+					static_cast<unsigned long>(p),
+					static_cast<unsigned long>(w)
 					);
 			}
 
