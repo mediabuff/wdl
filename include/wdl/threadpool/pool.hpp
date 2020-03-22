@@ -1,4 +1,6 @@
 // pool.hpp
+//
+// Class Implementation: wdl::threadpool::pool
 
 #pragma once
 
