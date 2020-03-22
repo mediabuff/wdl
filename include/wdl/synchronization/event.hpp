@@ -7,6 +7,7 @@
 #pragma once
 
 #include <windows.h>
+#include <string>
 
 #include <wdl/debug.hpp>
 #include <wdl/handle.hpp>
@@ -32,10 +33,17 @@ namespace wdl::synchronization
 		using null_handle_t = wdl::handle::null_handle;
 
 		null_handle_t m_handle;
+		bool          m_created_new;
 
 	public:
 		explicit event(event_type type)
-			: m_handle{ ::CreateEvent(nullptr, static_cast<bool>(type), false, nullptr) }
+			: m_handle{ ::CreateEventW(nullptr, static_cast<bool>(type), false, nullptr) }
+			, m_created_new{ true }
+		{}
+
+		event(event_type type, std::wstring const& name)
+			: m_handle{ ::CreateEventW(nullptr, static_cast<bool>(type), false, name.c_str()) }
+			, m_created_new{ !(::GetLastError() == ERROR_ALREADY_EXISTS) }
 		{}
 
 		// rely on destructor for null_handle to clean up
@@ -82,7 +90,12 @@ namespace wdl::synchronization
 			return m_handle.get();
 		}
 
-		bool valid() const noexcept
+		bool is_new_instance() const noexcept
+		{
+			return static_cast<bool>(m_handle) && m_created_new;
+		}
+
+		bool is_valid() const noexcept
 		{
 			return m_handle ? true : false;
 		}

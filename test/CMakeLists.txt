@@ -6,6 +6,8 @@ include(${CMAKE_SOURCE_DIR}/deps/catch2/contrib/Catch.cmake)
 add_library(catch_main STATIC catch_main.cpp)
 target_link_libraries(catch_main PUBLIC Catch2::Catch2)
 
+set(HANDLE_SRCS
+    "handle/generic.cpp")
 set(IO_SRCS
     "io/iocp.cpp")
 set(SYNCHRONIZATION_SRCS
@@ -14,14 +16,15 @@ set(SYNCHRONIZATION_SRCS
     "synchronization/event.cpp"
     "synchronization/mutex.cpp"
     "synchronization/slim_lock.cpp")
-set(HANDLE_SRCS
-    "handle/generic.cpp")
+set(THREAD_SRCS
+    "thread/thread.cpp")
 
-add_executable(wdl_tests
+add_executable(wdl_test_suite
+    ${HANDLE_SRCS}
     ${IO_SRCS}
     ${SYNCHRONIZATION_SRCS}
-    ${UTILITY_SRCS})
+    ${THREAD_SRCS})
     
-target_link_libraries(wdl_tests PRIVATE catch_main wdl)
+target_link_libraries(wdl_test_suite PRIVATE catch_main wdl)
 
-catch_discover_tests(wdl_tests)
+catch_discover_tests(wdl_test_suite)
