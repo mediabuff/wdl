@@ -16,7 +16,8 @@ set(SYNCHRONIZATION_SRCS
     "synchronization/event.cpp"
     "synchronization/mutex.cpp"
     "synchronization/slim_lock.cpp"
-    "synchronization/wait.cpp")
+    "synchronization/wait.cpp"
+    "synchronization/waitable_address.cpp")
 set(THREAD_SRCS
     "thread/thread.cpp")
 set(THREADPOOL_SRCS

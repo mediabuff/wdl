@@ -14,10 +14,16 @@ namespace wdl::synchronization
     namespace detail
     {
         template <size_t addr_size>
-        void interlocked_update(void* target_address, void* new_value_address);
+        void interlocked_update(
+            void* target_address, 
+            void* new_value_address
+            );
 
         template<>
-        void interlocked_update<sizeof(uint8_t)>(void* target_address, void* new_value_address)
+        void interlocked_update<sizeof(uint8_t)>(
+            void* target_address, 
+            void* new_value_address
+            )
         {
             InterlockedExchange8(
                 static_cast<char*>(target_address), 
@@ -26,7 +32,10 @@ namespace wdl::synchronization
         }
 
         template<>
-        void interlocked_update<sizeof(uint16_t)>(void* target_address, void* new_value_address)
+        void interlocked_update<sizeof(uint16_t)>(
+            void* target_address, 
+            void* new_value_address
+            )
         {
             InterlockedExchange16(
                 static_cast<SHORT*>(target_address), 
@@ -35,7 +44,10 @@ namespace wdl::synchronization
         }
 
         template<>
-        void interlocked_update<sizeof(uint32_t)>(void* target_address, void* new_value_address)
+        void interlocked_update<sizeof(uint32_t)>(
+            void* target_address, 
+            void* new_value_address
+            )
         {
             InterlockedExchange(
                 static_cast<LONG*>(target_address), 
@@ -44,7 +56,10 @@ namespace wdl::synchronization
         }
 
         template<>
-        void interlocked_update<sizeof(uint64_t)>(void* target_address, void* new_value_address)
+        void interlocked_update<sizeof(uint64_t)>(
+            void* target_address, 
+            void* new_value_address
+            )
         {
             InterlockedExchange64(
                 static_cast<LONG64*>(target_address), 
@@ -63,46 +78,50 @@ namespace wdl::synchronization
             (sizeof(TargetAddressType) == 8)
             );
 
-        TargetAddressType* target_address_;
+        TargetAddressType* m_target_address;
 
     public:
         waitable_address(TargetAddressType* target_address)
-            : target_address_{ target_address }
+            : m_target_address{ target_address }
         {}
 
         // non-copyable
-        waitable_address(waitable_address& other) = delete;
+        waitable_address(waitable_address& other)          = delete;
         waitable_address& operator=(waitable_address& rhs) = delete;
 
         // non-movable
-        waitable_address(waitable_address&& other) = delete;
+        waitable_address(waitable_address&& other)          = delete;
         waitable_address& operator=(waitable_address&& rhs) = delete;
 
-        void wait_until_not(TargetAddressType undesired, DWORD timeout = INFINITE)
+        void wait_until_not(
+            TargetAddressType undesired, 
+            unsigned long timeout = INFINITE
+            )
         {
-            TargetAddressType captured = *target_address_;
+            TargetAddressType captured = *m_target_address;
             while (captured == undesired)
             {
                 ::WaitOnAddress(
-                    target_address_, 
+                    m_target_address, 
                     static_cast<void*>(&undesired),
                     sizeof(TargetAddressType),
                     timeout
                     );
-                captured = *target_address_;
+                    
+                captured = *m_target_address;
             }
         }
 
         void write_and_wake_one(TargetAddressType new_value)
         {
-            detail::interlocked_update<sizeof(TargetAddressType)>(target_address_, &new_value);
-            ::WakeByAddressSingle(target_address_);
+            detail::interlocked_update<sizeof(TargetAddressType)>(m_target_address, &new_value);
+            ::WakeByAddressSingle(m_target_address);
         }
 
         void write_and_wake_all(TargetAddressType new_value)
         {
-            detail::interlocked_update<sizeof(TargetAddressType)>(target_address_, &new_value);
-            ::WakeByAddressAll(target_address_);
+            detail::interlocked_update<sizeof(TargetAddressType)>(m_target_address, &new_value);
+            ::WakeByAddressAll(m_target_address);
         }
     };
 }
