@@ -10,7 +10,8 @@
 #pragma once
 
 #include <windows.h>
-#include <wdl/debug/debug.hpp>
+#include <iostream>
+#include <wdl/debug.hpp>
 
 namespace wdl::synchronization
 {
@@ -20,8 +21,8 @@ namespace wdl::synchronization
 
 		template <typename T, typename... Args>
 		void pack(
-			HANDLE* left,
-			T const& right,
+			HANDLE*        left,
+			T const&       right,
 			Args const&... args
 		)
 		{
@@ -37,7 +38,13 @@ namespace wdl::synchronization
 	void wait_one(
 		HANDLE const handle, 
 		unsigned long const timeout = INFINITE
+		)
+	{
+		VERIFY_(
+			WAIT_OBJECT_0,
+			::WaitForSingleObject(handle, timeout)
 		);
+	}
 
 	// wdl::synchronization::wait_one()
 	//
@@ -78,7 +85,13 @@ namespace wdl::synchronization
 	// Simple wrapper around object wait for dispatcher objects.
 
 	void wait_handles(
-		HANDLE const handles[], 
-		unsigned const size
+		HANDLE* const handles, 
+		unsigned long const size
+		)
+	{
+		VERIFY_(
+			WAIT_OBJECT_0,
+			::WaitForMultipleObjects(size, handles, true, INFINITE)
 		);
+	}
 }
