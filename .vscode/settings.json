@@ -6,5 +6,6 @@
         "xstring": "cpp",
         "memory": "cpp",
         "chrono": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }

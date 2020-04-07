@@ -10,6 +10,8 @@ set(HANDLE_SRCS
     "handle/generic.cpp")
 set(IO_SRCS
     "io/iocp.cpp")
+set(MEMORY_SRCS
+    "memory/region.cpp")
 set(SYNCHRONIZATION_SRCS
     "synchronization/barrier.cpp"
     "synchronization/critical_section.cpp"
@@ -27,6 +29,7 @@ set(TIMING_SRCS
 
 add_executable(handle_tests ${HANDLE_SRCS})
 add_executable(io_tests ${IO_SRCS})
+add_executable(memory_tests ${MEMORY_SRCS})
 add_executable(synchronization_tests ${SYNCHRONIZATION_SRCS})
 add_executable(thread_tests ${THREAD_SRCS})
 add_executable(threadpool_tests ${THREADPOOL_SRCS})
@@ -34,6 +37,7 @@ add_executable(timing_tests ${TIMING_SRCS})
     
 target_link_libraries(handle_tests PRIVATE catch_main wdl)
 target_link_libraries(io_tests PRIVATE catch_main wdl)
+target_link_libraries(memory_tests PRIVATE catch_main wdl)
 target_link_libraries(synchronization_tests PRIVATE catch_main wdl)
 target_link_libraries(thread_tests PRIVATE catch_main wdl)
 target_link_libraries(threadpool_tests PRIVATE catch_main wdl)
@@ -41,6 +45,7 @@ target_link_libraries(timing_tests PRIVATE catch_main wdl)
 
 catch_discover_tests(handle_tests)
 catch_discover_tests(io_tests)
+catch_discover_tests(memory_tests)
 catch_discover_tests(synchronization_tests)
 catch_discover_tests(thread_tests)
 catch_discover_tests(threadpool_tests)
