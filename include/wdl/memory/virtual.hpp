@@ -60,7 +60,7 @@ namespace wdl::memory
             return *this;
         }
 
-        bool valid() const noexcept
+        bool is_valid() const noexcept
         {
             return m_handle != nullptr;
         }
