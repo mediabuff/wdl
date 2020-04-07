@@ -17,6 +17,7 @@ namespace wdl::memory
     class region
     {
         region_type m_type;
+        SIZE_T      m_size;
         void*       m_handle;
 
     public:
@@ -24,12 +25,12 @@ namespace wdl::memory
             region_type   type, 
             SIZE_T        size,
             unsigned long protect
-            ) : m_type{ type }
+            ) : m_type{ type }, m_size{size}
         {
             auto flags = MEM_RESERVE;
             flags = flags | (type == region_type::commit ? MEM_COMMIT : 0);
 
-            m_handle = ::VirtualAlloc(nullptr, size, flags, protect);
+            m_handle = ::VirtualAlloc(nullptr, m_size, flags, protect);
         }
 
         ~region()
@@ -42,6 +43,7 @@ namespace wdl::memory
 
         region(region&& other)
             : m_type{ other.m_type }
+            , m_size{ other.m_size }
             , m_handle{ other.m_handle }
         {
             other.m_handle = nullptr;
@@ -53,11 +55,22 @@ namespace wdl::memory
             {   
                 release();
                 m_type = rhs.m_type;
+                m_size = rhs.m_size;
                 m_handle = rhs.m_handle;
                 rhs.m_handle = nullptr;
             }
 
             return *this;
+        }
+
+        void* get_base() const noexcept
+        {
+            return m_handle;
+        }
+
+        SIZE_T get_size() const noexcept
+        {
+            return m_size;
         }
 
         bool is_valid() const noexcept
