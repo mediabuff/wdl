@@ -63,14 +63,20 @@ namespace wdl::memory
             return *this;
         }
 
-        void* get_base() const noexcept
+        region_type get_type() const noexcept
         {
-            return m_handle;
+            return m_type;
         }
 
+    
         SIZE_T get_size() const noexcept
         {
             return m_size;
+        }
+
+        void* get_base() const noexcept
+        {
+            return m_handle;
         }
 
         bool is_valid() const noexcept
