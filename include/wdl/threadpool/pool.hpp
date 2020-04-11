@@ -19,25 +19,41 @@ namespace wdl::threadpool
 	//
 	// Defines function signature for work callback.
 
-	using work_callback_f = void(*)(PTP_WORK);
+	using work_callback_f = void(__stdcall*)(
+		PTP_CALLBACK_INSTANCE, 
+		void*, 
+		PTP_WORK);
 
 	// wdl::threadpool::wait_completion_f
 	//
 	// Defines function signature for wait completion callback.
 
-	using wait_completion_f = void(*)(PTP_WAIT, TP_WAIT_RESULT);
+	using wait_completion_f = void(__stdcall*)(
+		PTP_CALLBACK_INSTANCE, 
+		void*, 
+		PTP_WAIT, 
+		TP_WAIT_RESULT);
 
 	// wdl::threadpool::timer_completion_f
 	//
 	// Defines callback signature for timer completion callback.
 
-	using timer_completion_f = void(*)(PTP_TIMER);
+	using timer_completion_f = void(*)(
+		PTP_CALLBACK_INSTANCE, 
+		void*, 
+		PTP_TIMER);
 
 	// wdl::threadpool::io_completion_f
 	//
 	// Defines function signature for IO completion callback.
-
-	using io_completion_f = void(*)(void*, unsigned long, ULONG_PTR, PTP_IO); 
+	
+	using io_completion_f = void(*)(
+		PTP_CALLBACK_INSTANCE, 
+		void*, 
+		void*, 
+		unsigned long, 
+		ULONG_PTR, 
+		PTP_IO); 
 
 	// wdl::threadpool::pool_cancellation_policy
 	//
@@ -106,52 +122,43 @@ namespace wdl::threadpool
 			return ::SetThreadpoolThreadMinimum(m_handle.get(), count);
 		}
 
-		PTP_WORK create_work(work_callback_f fn)
+		PTP_WORK create_work(work_callback_f callback, void* ctx)
 		{
 			auto work_object = ::CreateThreadpoolWork(
-				work_callback_trampoline,
-				static_cast<void*>(fn),
-				m_environment.get()
-				);
-
-			if (work_object != NULL)
-			{
-				::SubmitThreadpoolWork(work_object);
-			}
+				callback,
+				ctx,
+				m_environment.get());
 
 			return work_object;
 		}
 
-		PTP_WAIT create_wait(wait_completion_f fn)
+		PTP_WAIT create_wait(wait_completion_f callback, void* ctx)
 		{
 			auto wait_object = ::CreateThreadpoolWait(
-				wait_completion_trampoline,
-				static_cast<void*>(fn),
-				m_environment.get()
-				);
+				callback,
+				ctx,
+				m_environment.get());
 
 			return wait_object;	
 		}
 
-		PTP_TIMER create_timer(timer_completion_f fn)
+		PTP_TIMER create_timer(timer_completion_f callback, void* ctx)
 		{
 			auto timer_object = ::CreateThreadpoolTimer(
-				timer_completion_trampoline,
-				static_cast<void*>(fn),
-				m_environment.get()
-				);
+				callback,
+				ctx,
+				m_environment.get());
 
 			return timer_object;
 		}
 
-		PTP_IO create_io(HANDLE handle, io_completion_f handler)
+		PTP_IO create_io(HANDLE handle, io_completion_f callback, void* ctx)
 		{
 			auto io_object = ::CreateThreadpoolIo(
 				handle, 
-				io_completion_trampoline,
-				static_cast<void*>(handler),
-				m_environment.get()
-				);
+				callback,
+				ctx,
+				m_environment.get());
 			
 			return io_object;
 		}
@@ -165,60 +172,11 @@ namespace wdl::threadpool
 		{
 			return static_cast<bool>(m_handle);
 		}
-
-    private:
-		// proxy for work callbacks
-		static void __stdcall work_callback_trampoline(
-        	PTP_CALLBACK_INSTANCE,
-    		void*                 context,
-    	    PTP_WORK              work_object
-			)
-		{
-			auto fn = static_cast<work_callback_f>(context);
-			fn(work_object);
-		}
-
-		// proxy for wait completions
-		static void __stdcall wait_completion_trampoline(
-        	PTP_CALLBACK_INSTANCE,
-     		void*                 context,
-         	PTP_WAIT              wait_object,
-            TP_WAIT_RESULT        wait_result
-			)
-		{
-			auto fn = static_cast<wait_completion_f>(context);
-			fn(wait_object, wait_result);
-		}
-
-		// proxy for timer completions
-		static void __stdcall timer_completion_trampoline(
-			PTP_CALLBACK_INSTANCE,
-    		void*                 context,
-    		PTP_TIMER             timer_object
-			)
-		{
-			auto fn = static_cast<timer_completion_f>(context);
-			fn(timer_object);
-		}
-
-		// proxy for io completion
-		static void __stdcall io_completion_trampoline(
-			PTP_CALLBACK_INSTANCE,
-			void*                 context, 
-			void*                 overlapped,
-			unsigned long         io_result,
-			ULONG_PTR             bytes_transferred,
-			PTP_IO                io_object
-			)
-		{
-			auto fn = static_cast<io_completion_f>(context);
-			fn(overlapped, io_result, bytes_transferred, io_object); 
-		}
 	};
 	
-	PTP_WORK create_work(pool& p, work_callback_f fn)
+	PTP_WORK create_work(pool& p, work_callback_f fn, void* ctx)
 	{
-		return p.create_work(fn);
+		return p.create_work(fn, ctx);
 	}
 
 	void submit_work(PTP_WORK work_object)
@@ -226,9 +184,9 @@ namespace wdl::threadpool
 		::SubmitThreadpoolWork(work_object);
 	}
 
-	PTP_WAIT create_wait(pool& p, wait_completion_f fn)
+	PTP_WAIT create_wait(pool& p, wait_completion_f fn, void* ctx)
 	{
-		return p.create_wait(fn);
+		return p.create_wait(fn, ctx);
 	}
 
 	void set_wait(PTP_WAIT wait_object, HANDLE handle)
@@ -247,9 +205,9 @@ namespace wdl::threadpool
 		::SetThreadpoolWait(wait_object, handle, &ft);
 	}
 
-	PTP_TIMER create_timer(pool& p, timer_completion_f fn)
+	PTP_TIMER create_timer(pool& p, timer_completion_f fn, void* ctx)
 	{
-		return p.create_timer(fn);
+		return p.create_timer(fn, ctx);
 	}
 
 	template <typename DueDuration, 
@@ -275,9 +233,9 @@ namespace wdl::threadpool
 			);
 	}
 
-	PTP_IO create_io(pool& p, HANDLE handle, io_completion_f handler)
+	PTP_IO create_io(pool& p, HANDLE handle, io_completion_f fn, void* ctx)
 	{
-		return p.create_io(handle, handler);
+		return p.create_io(handle, fn, ctx);
 	}
 
 	void start_io(PTP_IO io_object)
