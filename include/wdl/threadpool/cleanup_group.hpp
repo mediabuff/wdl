@@ -31,6 +31,7 @@ namespace wdl::threadpool
         cleanup_group(cleanup_group_cancellation_policy policy
             = cleanup_group_cancellation_policy::no_cancel) 
             : m_group{ ::CreateThreadpoolCleanupGroup() }
+            , m_policy{ policy }
         {}
 
         ~cleanup_group()

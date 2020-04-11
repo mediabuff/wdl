@@ -37,7 +37,7 @@ namespace wdl::threadpool
 	//
 	// Defines function signature for IO completion callback.
 
-	using io_completion_f = void(*)(PTP_IO, unsigned long, ULONG_PTR); 
+	using io_completion_f = void(*)(void*, unsigned long, ULONG_PTR, PTP_IO); 
 
 	// wdl::threadpool::pool_cancellation_policy
 	//
@@ -106,7 +106,7 @@ namespace wdl::threadpool
 			return ::SetThreadpoolThreadMinimum(m_handle.get(), count);
 		}
 
-		PTP_WORK submit_work(work_callback_f fn)
+		PTP_WORK create_work(work_callback_f fn)
 		{
 			auto work_object = ::CreateThreadpoolWork(
 				work_callback_trampoline,
@@ -122,10 +122,7 @@ namespace wdl::threadpool
 			return work_object;
 		}
 
-		PTP_WAIT submit_wait(
-			HANDLE            handle, 
-			wait_completion_f fn
-			)
+		PTP_WAIT create_wait(wait_completion_f fn)
 		{
 			auto wait_object = ::CreateThreadpoolWait(
 				wait_completion_trampoline,
@@ -133,46 +130,10 @@ namespace wdl::threadpool
 				m_environment.get()
 				);
 
-			if (wait_object != NULL)
-			{
-				// TODO: support non-infinite timeout
-				::SetThreadpoolWait(wait_object, handle, NULL);
-			}
-
 			return wait_object;	
 		}
 
-		template <typename DurationType>
-		PTP_WAIT submit_wait(
-			HANDLE            handle,
-			DurationType      timeout, 
-			wait_completion_f fn
-			)
-		{
-			auto wait_object = ::CreateThreadpoolWait(
-				wait_completion_trampoline,
-				static_cast<void*>(fn),
-				m_environment.get()
-				);
-
-			if (wait_object != NULL)
-			{
-				auto ft = wdl::timing::to_filetime<DurationType>(duration);
-				::SetThreadpoolWait(wait_object, handle, &ft);
-			}
-
-			return wait_object;	
-		}
-
-		template <typename DueDuration, 
-				  typename PeriodDuration, 
-				  typename WindowDuration>
-		PTP_TIMER submit_timer(
-			DueDuration        due_time,
-			PeriodDuration     period,
-			WindowDuration     window,
-			timer_completion_f fn
-		)
+		PTP_TIMER create_timer(timer_completion_f fn)
 		{
 			auto timer_object = ::CreateThreadpoolTimer(
 				timer_completion_trampoline,
@@ -180,30 +141,11 @@ namespace wdl::threadpool
 				m_environment.get()
 				);
 
-			if (timer_object != NULL)
-			{
-				auto ft = wdl::timing::to_filetime<DueDuration>(due_time);
-				auto p = std::chrono::duration_cast<std::chrono::milliseconds>(period).count();
-				auto w = std::chrono::duration_cast<std::chrono::milliseconds>(window).count();
-
-				// TODO: explicit narrowing conversions
-				::SetThreadpoolTimer(
-					timer_object,
-					&ft,
-					static_cast<unsigned long>(p),
-					static_cast<unsigned long>(w)
-					);
-			}
-
 			return timer_object;
 		}
 
-		PTP_IO submit_io(
-			HANDLE          handle, 
-			io_completion_f handler
-			)
+		PTP_IO create_io(HANDLE handle, io_completion_f handler)
 		{
-			// create the io object
 			auto io_object = ::CreateThreadpoolIo(
 				handle, 
 				io_completion_trampoline,
@@ -211,11 +153,6 @@ namespace wdl::threadpool
 				m_environment.get()
 				);
 			
-			if (io_object != NULL)
-			{
-				::StartThreadpoolIo(io_object);
-			}
-
 			return io_object;
 		}
 
@@ -232,7 +169,7 @@ namespace wdl::threadpool
     private:
 		// proxy for work callbacks
 		static void __stdcall work_callback_trampoline(
-        	PTP_CALLBACK_INSTANCE instance,
+        	PTP_CALLBACK_INSTANCE,
     		void*                 context,
     	    PTP_WORK              work_object
 			)
@@ -243,7 +180,7 @@ namespace wdl::threadpool
 
 		// proxy for wait completions
 		static void __stdcall wait_completion_trampoline(
-        	PTP_CALLBACK_INSTANCE instance,
+        	PTP_CALLBACK_INSTANCE,
      		void*                 context,
          	PTP_WAIT              wait_object,
             TP_WAIT_RESULT        wait_result
@@ -255,7 +192,7 @@ namespace wdl::threadpool
 
 		// proxy for timer completions
 		static void __stdcall timer_completion_trampoline(
-			PTP_CALLBACK_INSTANCE instance,
+			PTP_CALLBACK_INSTANCE,
     		void*                 context,
     		PTP_TIMER             timer_object
 			)
@@ -266,7 +203,7 @@ namespace wdl::threadpool
 
 		// proxy for io completion
 		static void __stdcall io_completion_trampoline(
-			PTP_CALLBACK_INSTANCE instance,
+			PTP_CALLBACK_INSTANCE,
 			void*                 context, 
 			void*                 overlapped,
 			unsigned long         io_result,
@@ -275,9 +212,76 @@ namespace wdl::threadpool
 			)
 		{
 			auto fn = static_cast<io_completion_f>(context);
-			fn(io_object, io_result, bytes_transferred); 
+			fn(overlapped, io_result, bytes_transferred, io_object); 
 		}
 	};
 	
+	PTP_WORK create_work(pool& p, work_callback_f fn)
+	{
+		return p.create_work(fn);
+	}
 
+	void submit_work(PTP_WORK work_object)
+	{
+		::SubmitThreadpoolWork(work_object);
+	}
+
+	PTP_WAIT create_wait(pool& p, wait_completion_f fn)
+	{
+		return p.create_wait(fn);
+	}
+
+	void set_wait(PTP_WAIT wait_object, HANDLE handle)
+	{
+		::SetThreadpoolWait(wait_object, handle, nullptr);
+	}
+
+	template <typename DurationType>
+	void set_wait(
+		PTP_WAIT     wait_object, 
+		HANDLE       handle, 
+		DurationType timeout
+		)
+	{
+		auto ft = wdl::timing::to_filetime<DurationType>(timeout);
+		::SetThreadpoolWait(wait_object, handle, &ft);
+	}
+
+	PTP_TIMER create_timer(pool& p, timer_completion_f fn)
+	{
+		return p.create_timer(fn);
+	}
+
+	template <typename DueDuration, 
+			  typename PeriodDuration, 
+			  typename WindowDuration>
+	void set_timer(
+		PTP_TIMER      timer_object,
+		DueDuration    due_time,
+		PeriodDuration period,
+		WindowDuration window
+		)
+	{
+		auto ft = wdl::timing::to_filetime<DueDuration>(due_time);
+		auto p  = std::chrono::duration_cast<std::chrono::milliseconds>(period).count();
+		auto w  = std::chrono::duration_cast<std::chrono::milliseconds>(window).count();
+
+		// TODO: explicit narrowing conversions
+		::SetThreadpoolTimer(
+			timer_object,
+			&ft,
+			static_cast<unsigned long>(p),
+			static_cast<unsigned long>(w)
+			);
+	}
+
+	PTP_IO create_io(pool& p, HANDLE handle, io_completion_f handler)
+	{
+		return p.create_io(handle, handler);
+	}
+
+	void start_io(PTP_IO io_object)
+	{
+		::StartThreadpoolIo(io_object);
+	}
 }
