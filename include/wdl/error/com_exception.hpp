@@ -24,4 +24,14 @@ namespace wdl::error
             return m_code;
         }
 	};
+
+	// wdl::error::check_com()
+
+	void check_com(HRESULT const result)
+	{
+		if (S_OK != result)
+		{
+			throw com_exception{ result };
+		}
+	}
 }

@@ -25,4 +25,14 @@ namespace wdl::error
 			return m_code;
 		}
 	};
+
+	// wdl::error::check_win32()
+
+	void check_win32(unsigned long const result)
+	{
+		if (ERROR_SUCCESS != result)
+		{
+			throw win32_exception{ result };
+		}
+	}
 }

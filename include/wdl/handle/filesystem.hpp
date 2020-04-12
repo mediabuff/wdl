@@ -14,7 +14,7 @@ namespace wdl::handle
     // Traits definition appropriate for 
     // filesystem file search operations
 
-    struct find_fail_handle_traits
+    struct find_file_handle_traits
     {
         using pointer = HANDLE;
 
