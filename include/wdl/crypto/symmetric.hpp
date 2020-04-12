@@ -11,25 +11,25 @@
 
 #include <wdl/crypto/base.hpp>
 #include <wdl/crypto/key.hpp>
-
+#include <wdl/crypto/hash.hpp>
 
 namespace wdl::crypto
 {   
-    bytes_t create_shared_secret(bytes_t const& secret)
+    bytes_t create_shared_secret(bytes_view_t secret)
     {
-        auto p = open_provider(BCRYPT_SHA256_ALGORITHM);
+        auto provider = open_provider(BCRYPT_SHA256_ALGORITHM);
 
-        auto h = create_hash(p);
+        auto hash = create_hash(provider);
 
-        combine_hash(h, secret.data(), secret.size());
+        combine_hash(hash, secret.data(), secret.size());
 
         auto size = unsigned{};
 
-        get_property(h.get(), BCRYPT_HASH_LENGTH, size);
+        get_property(hash.get(), BCRYPT_HASH_LENGTH, size);
 
-        auto value = bytes_t(size);
+        auto value = bytes_t(size, 0);
 
-        get_hash_value(h, value.data(), size);
+        get_hash_value(hash, value.data(), size);
 
         return value;
     }
@@ -93,33 +93,33 @@ namespace wdl::crypto
     }
 
     bytes_t encrypt_message(
-        bytes_t const& shared,
-        bytes_t const& plaintext,
+        bytes_view_t   shared,
+        bytes_view_t   plaintext,
         wchar_t const* algorithm = BCRYPT_AES_ALGORITHM
         )
     {
-        auto p = open_provider(algorithm);
+        auto provider = open_provider(algorithm);
 
-        auto k = create_key(
-            p,
-            &shared[0],
+        auto key = create_key(
+            provider,
+            shared.data(),
             shared.size());
 
         auto size = encrypt(
-            k,
+            key,
             plaintext.data(),
             plaintext.size(),
             nullptr,
             0,
             BCRYPT_BLOCK_PADDING);
 
-        bytes_t ciphertext(size);
+        auto ciphertext = bytes_t(size, 0);
 
         encrypt(
-            k,
+            key,
             plaintext.data(),
             plaintext.size(),
-            &ciphertext[0],
+            ciphertext.data(),
             size,
             BCRYPT_BLOCK_PADDING);
 
@@ -127,20 +127,20 @@ namespace wdl::crypto
     }
 
     bytes_t decrypt_message(
-        bytes_t const& shared,
-        bytes_t const& ciphertext,
+        bytes_view_t   shared,
+        bytes_view_t   ciphertext,
         wchar_t const* algorithm = BCRYPT_AES_ALGORITHM
         )
     {
-        auto p = open_provider(algorithm);
+        auto provider = open_provider(algorithm);
 
-        auto k = create_key(
-            p,
-            &shared[0],
+        auto key = create_key(
+            provider,
+            shared.data(),
             shared.size());
 
         auto size = decrypt(
-            k,
+            key,
             ciphertext.data(),
             ciphertext.size(),
             nullptr,
@@ -150,7 +150,7 @@ namespace wdl::crypto
         auto plaintext = bytes_t(size, 0);
 
         decrypt(
-            k,
+            key,
             ciphertext.data(),
             ciphertext.size(),
             plaintext.data(),

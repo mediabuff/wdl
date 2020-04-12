@@ -16,7 +16,8 @@
 #include <windows.h>
 #include <bcrypt.h>
 
-#include <vector>
+#include <string>
+#include <string_view>
 
 #include <wdl/debug.hpp>
 #include <wdl/handle/unique_handle.hpp>
@@ -24,8 +25,9 @@
 
 namespace wdl::crypto
 {
-    using byte_t  = BYTE;
-    using bytes_t = std::vector<byte_t>;
+    using byte_t       = BYTE;
+    using bytes_t      = std::basic_string<byte_t>;
+    using bytes_view_t = std::basic_string_view<byte_t>;
 
     // wdl::handle::provider_handle_traits
     //
