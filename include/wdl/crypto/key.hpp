@@ -3,14 +3,14 @@
 // Free Function Implementation
 //  - wdl::crypto::create_key()
 
-#include <crypto/base.hpp>
+#include <wdl/crypto/base.hpp>
 
 namespace wdl::crypto
 {
     key_handle create_key(
         provider_handle const& p,
         void const*            secret,
-        unsigned               size
+        size_t                 size
         )
     {
         auto k = key_handle{};
@@ -22,7 +22,7 @@ namespace wdl::crypto
             0,
             static_cast<unsigned char*>(
                 const_cast<void*>(secret)),
-            size,
+            static_cast<unsigned long>(size),
             0);
 
         wdl::error::check_nt(result);

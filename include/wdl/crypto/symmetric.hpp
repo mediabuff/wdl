@@ -37,9 +37,9 @@ namespace wdl::crypto
     unsigned long encrypt(
         key_handle const& k,
         void const*       plaintext,
-        unsigned          plaintext_size,
+        size_t            plaintext_size,
         void*             ciphertext,
-        unsigned          ciphertext_size,
+        size_t            ciphertext_size,
         unsigned          flags
         )
     {
@@ -49,12 +49,12 @@ namespace wdl::crypto
             k.get(),
             static_cast<unsigned char*>(
                 const_cast<void*>(plaintext)),
-            plaintext_size,
+            static_cast<unsigned long>(plaintext_size),
             nullptr,
             nullptr,
             0,
             static_cast<unsigned char*>(ciphertext),
-            ciphertext_size,
+            static_cast<unsigned long>(ciphertext_size),
             &bytes_copied,
             flags);
 
@@ -66,9 +66,9 @@ namespace wdl::crypto
     unsigned long decrypt(
         key_handle const& k,
         void const*       ciphertext,
-        unsigned          ciphertext_size,
+        size_t            ciphertext_size,
         void*             plaintext,
-        unsigned          plaintext_size,
+        size_t            plaintext_size,
         unsigned          flags
         )
     {
@@ -78,12 +78,12 @@ namespace wdl::crypto
             k.get(),
             static_cast<unsigned char*>(
                 const_cast<void*>(ciphertext)),
-            ciphertext_size,
+            static_cast<unsigned long>(ciphertext_size),
             nullptr,
             nullptr,
             0,
             static_cast<unsigned char*>(plaintext),
-            plaintext_size,
+            static_cast<unsigned long>(plaintext_size),
             &bytes_copied,
             flags);
 

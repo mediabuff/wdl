@@ -29,14 +29,14 @@ namespace wdl::crypto
     void combine_hash(
         hash_handle const& h,
         void const*        buffer,
-        unsigned long      size
+        size_t             size
         )
     {
         auto result = ::BCryptHashData(
             h.get(),
             static_cast<unsigned char*>(
                 const_cast<void*>(buffer)),
-            size,
+            static_cast<unsigned long>(size),
             0);
 
         wdl::error::check_nt(result);
@@ -45,13 +45,13 @@ namespace wdl::crypto
     void get_hash_value(
         hash_handle const& h,
         void*              buffer,
-        unsigned long      size
+        size_t             size
         )
     {
         auto result = ::BCryptFinishHash(
             h.get(),
             static_cast<unsigned char*>(buffer),
-            size,
+            static_cast<unsigned long>(size),
             0);
 
         wdl::error::check_nt(result);
