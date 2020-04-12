@@ -7,7 +7,7 @@ add_library(catch_main STATIC catch_main.cpp)
 target_link_libraries(catch_main PUBLIC Catch2::Catch2)
 
 set(CRYPTO_SRCS
-    "crypto/random.cpp")
+    "crypto/buffer.cpp")
 set(HANDLE_SRCS
     "handle/generic.cpp")
 set(IO_SRCS

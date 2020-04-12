@@ -28,8 +28,7 @@ namespace wdl::crypto
 {
     using byte_t       = BYTE;
     using bytes_t      = std::basic_string<byte_t>;
-    using bytes_view_t = std::basic_string_view<byte_t>;
-
+    
     // wdl::handle::provider_handle_traits
     //
     // Traits definition appropriate for use

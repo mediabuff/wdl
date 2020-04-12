@@ -12,10 +12,11 @@
 #include <wdl/crypto/base.hpp>
 #include <wdl/crypto/key.hpp>
 #include <wdl/crypto/hash.hpp>
+#include <wdl/crypto/buffer.hpp>
 
 namespace wdl::crypto
 {   
-    bytes_t create_shared_secret(bytes_view_t secret)
+    bytes_t create_shared_secret(const_buffer secret)
     {
         auto provider = open_provider(BCRYPT_SHA256_ALGORITHM);
 
@@ -93,8 +94,8 @@ namespace wdl::crypto
     }
 
     bytes_t encrypt_message(
-        bytes_view_t   shared,
-        bytes_view_t   plaintext,
+        const_buffer   shared,
+        const_buffer   plaintext,
         wchar_t const* algorithm = BCRYPT_AES_ALGORITHM
         )
     {
@@ -127,8 +128,8 @@ namespace wdl::crypto
     }
 
     bytes_t decrypt_message(
-        bytes_view_t   shared,
-        bytes_view_t   ciphertext,
+        const_buffer   shared,
+        const_buffer   ciphertext,
         wchar_t const* algorithm = BCRYPT_AES_ALGORITHM
         )
     {

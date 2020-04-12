@@ -10,7 +10,7 @@
 
 TEST_CASE("wdl::threadpool::pool supports work submission")
 {
-    using wdl::handle::work_handle;
+    using wdl::threadpool::work_handle;
     using wdl::synchronization::event;
     using wdl::synchronization::event_type;
     using wdl::threadpool::pool_cancellation_policy;
