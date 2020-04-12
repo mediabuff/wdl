@@ -9,6 +9,9 @@
 
 #include <wdl/crypto/base.hpp>
 
+#include <vector>
+#include <string>
+
 namespace wdl::crypto
 {
     // wdl::crypto::mutable_buffer
@@ -79,6 +82,24 @@ namespace wdl::crypto
     const_buffer buffer(void const* data, size_t size_in_bytes) noexcept
     {
         return const_buffer(data, size_in_bytes);
+    }
+
+    // wdl::crypto::buffer()
+    //
+    // initialize mutable buffer from crypto bytes
+
+    mutable_buffer buffer(bytes_t& data)
+    {
+        return mutable_buffer(data.data(), data.size());
+    }
+
+    // wdl::crypto::buffer()
+    //
+    // initialize const buffer from crypto bytes
+
+    const_buffer buffer(bytes_t const& data)
+    {
+        return const_buffer(data.data(), data.size());
     }
 
     // wdl::crypto::buffer()

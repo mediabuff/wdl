@@ -132,19 +132,4 @@ namespace wdl::crypto
 
         wdl::error::check_nt(result);
     }
-
-    bytes_t to_bytes(void const* buffer, unsigned long size)
-    {
-        return bytes_t(static_cast<byte_t const*>(buffer), size);
-    }
-
-    bytes_t to_bytes(std::string const& str)
-    {
-        return to_bytes(str.data(), static_cast<unsigned long>(str.length()));
-    }
-
-    std::string from_bytes(bytes_t bytes)
-    {
-        return std::string(reinterpret_cast<char*>(bytes.data()), bytes.length());
-    }
 }
