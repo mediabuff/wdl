@@ -1,15 +1,18 @@
-// registry.hpp
+// base.hpp
 //
-// Traits definitions for wdl::handle::unique_handle.
+// Type Definitions
+//  wdl::registry::registry_handle
 
 #pragma once
 
 #include <windows.h>
-#include <wdl/debug.hpp>
 
-namespace wdl::handle
+#include <wdl/debug.hpp>
+#include <wdl/handle/unique_handle.hpp>
+
+namespace wdl::registry
 {
-    // wdl::handle::registry_handle_traits
+    // wdl::registry::registry_handle_traits
     //
     // Traits definition appropriate for Windows
     // handles returned by Registry API calls.
@@ -28,4 +31,6 @@ namespace wdl::handle
             VERIFY_(ERROR_SUCCESS, ::RegCloseKey(value));
         }
     };
+
+    using registry_handle = wdl::handle::unique_handle<registry_handle_traits>;
 }

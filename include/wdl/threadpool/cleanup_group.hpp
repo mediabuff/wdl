@@ -6,6 +6,8 @@
 
 #include <windows.h>
 
+#include <wdl/threadpool/base.hpp>
+
 namespace wdl::threadpool
 {
     // wdl::threadpool::cleanup_group_cancellation_policy

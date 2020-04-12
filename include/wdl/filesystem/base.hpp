@@ -1,15 +1,16 @@
-// filesystem.hpp
+// base.hpp
 //
-// Traits definitions for wdl::handle::unique_handle.
+// Type Definitions
+//  - wdl::filesystem::find_file_handle
 
 #pragma once
 
 #include <windows.h>
-#include <wdl/debug.hpp>
+#include <wdl/handle/unique_handle.hpp>
 
-namespace wdl::handle
+namespace wdl::filesystem
 {
-    // find_file_handle_traits
+    // wdl::filesystem::find_file_handle_traits
     // 
     // Traits definition appropriate for 
     // filesystem file search operations
@@ -28,4 +29,6 @@ namespace wdl::handle
             VERIFY(::FindClose(value));
         }
     };
+
+    using find_file_handle = wdl::handle::unique_handle<find_file_handle_traits>;
 }

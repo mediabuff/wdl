@@ -11,6 +11,7 @@
 
 #include <string>
 
+#include <wdl/filesystem/base.hpp>
 #include <wdl/error/com_exception.hpp>
 #include <wdl/error/win32_exception.hpp>
 

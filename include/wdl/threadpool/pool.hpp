@@ -7,11 +7,11 @@
 #include <windows.h>
 #include <chrono>
 
-#include <wdl/handle.hpp>
 #include <wdl/timing/filetime.hpp>
 
-#include "environment.hpp"
-#include "cleanup_group.hpp"
+#include <wdl/threadpool/base.hpp>
+#include <wdl/threadpool/environment.hpp>
+#include <wdl/threadpool/cleanup_group.hpp>
 
 namespace wdl::threadpool
 {
@@ -72,7 +72,7 @@ namespace wdl::threadpool
 
 	class pool
 	{
-		wdl::handle::pool_handle  m_handle;
+		pool_handle    m_handle;
 
         environment    m_environment;
 		cleanup_group  m_cleanup_group;

@@ -1,15 +1,17 @@
-// threadpool.hpp
+// base.hpp
 //
-// Traits definitions for wdl::handle::unique_handle.
+// Type Definitions
 
 #pragma once
 
 #include <windows.h>
-#include <wdl/debug.hpp>
 
-namespace wdl::handle
+#include <wdl/debug.hpp>
+#include <wdl/handle/unique_handle.hpp>
+
+namespace wdl::threadpool
 {
-    // wdl::handle::pool_handle_traits
+    // wdl::threadpool::pool_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows thread pool object
@@ -29,12 +31,14 @@ namespace wdl::handle
         }
     };
 
-    // wdl::handle::tp_work_handle_traits
+    using pool_handle = wdl::handle::unique_handle<pool_handle_traits>;
+
+    // wdl::threadpool::work_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows thread pool work object.
 
-    struct tp_work_handle_traits
+    struct work_handle_traits
     {
         using pointer = PTP_WORK;
 
@@ -51,12 +55,14 @@ namespace wdl::handle
         }
     };
 
-    // wdl::threadpool::tp_io_handle_traits
+    using work_handle = wdl::handle::unique_handle<work_handle_traits>;
+
+    // wdl::threadpool::io_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows threadpool IO objects.
 
-    struct tp_io_handle_traits
+    struct io_handle_traits
     {
         using pointer = PTP_IO;
 
@@ -73,11 +79,14 @@ namespace wdl::handle
         }
     };
 
-    // wdl::handle::tp_wait_handle_traits
+    using io_handle = wdl::handle::unique_handle<io_handle_traits>;
+
+    // wdl::threadpool::wait_handle_traits
+    //
     // Traits definition appropriate for use
     // with Windows thread pool wait objects.
 
-    struct tp_wait_handle_traits
+    struct wait_handle_traits
     {
         using pointer = PTP_WAIT;
 
@@ -94,12 +103,14 @@ namespace wdl::handle
         }
     };
 
-    // wdl::handle::tp_timer_handle_traits
+    using wait_handle = wdl::handle::unique_handle<wait_handle_traits>;
+
+    // wdl::threadpool::timer_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows thread pool timer object.
 
-    struct tp_timer_handle_traits
+    struct timer_handle_traits
     {
         using pointer = PTP_TIMER;
 
@@ -116,12 +127,14 @@ namespace wdl::handle
         }
     };
 
-    // wdl::handle::tp_cleanup_group_handle_traits
+    using timer_handle = wdl::handle::unique_handle<timer_handle_traits>;
+
+    // wdl::threadpool::cleanup_group_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows thread pool cleanup group object.
 
-    struct tp_cleanup_group_handle_traits
+    struct cleanup_group_handle_traits
     {
         using pointer = PTP_CLEANUP_GROUP;
 
@@ -135,4 +148,6 @@ namespace wdl::handle
             ::CloseThreadpoolCleanupGroup(value);
         }
     };
+
+    using cleanup_group_handle = wdl::handle::unique_handle<cleanup_group_handle_traits>;
 }

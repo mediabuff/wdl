@@ -1,4 +1,5 @@
 // environment.hpp
+//
 // Class Implementation: wdl::threadpool::environment
 
 #pragma once

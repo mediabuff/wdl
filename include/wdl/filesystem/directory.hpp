@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include <wdl/handle.hpp>
+#include <wdl/filesystem/base.hpp>
 #include <wdl/filesystem/path.hpp>
 #include <wdl/error/com_exception.hpp>
 #include <wdl/error/win32_exception.hpp>
@@ -61,7 +61,7 @@ namespace wdl::filesystem
 
         auto data = WIN32_FIND_DATA{};
 
-        auto find = wdl::handle::find_file_handle
+        auto find = find_file_handle
         {
             ::FindFirstFileW(search.c_str(), &data)
         };
