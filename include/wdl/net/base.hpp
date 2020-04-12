@@ -1,20 +1,23 @@
-// network.hpp
+// base.hpp
 //
-// Traits definitions for wdl::handle::unique_handle.
+// Type Definitions
+//  - wdl::network::http_handle
 
 #pragma once
 
 #include <winhttp.h>
-#include <wdl/debug.hpp>
 
-namespace wdl::handle
+#include <wdl/debug.hpp>
+#include <wdl/handle/unique_handle.hpp>
+
+namespace wdl::net
 {
-    // wdl::handle::winhttp_handle_traits
+    // wdl::net::http_handle_traits
     //
     // Traits definition appropriate for use
     // with the WinHTTP API.
 
-    struct winhttp_handle_traits
+    struct http_handle_traits
     {
         using pointer = HINTERNET;
 
@@ -28,4 +31,6 @@ namespace wdl::handle
             VERIFY(::WinHttpCloseHandle(value));
         }
     };
+
+    using http_handle = wdl::handle::unique_handle<http_handle_traits>;
 }

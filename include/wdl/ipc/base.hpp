@@ -1,15 +1,19 @@
-// pipe.hpp
+// base.hpp
 //
-// Traits definitions for wdl::handle::unique_handle.
+// Type Definitions
+//  - wdl::ipc::np_client_handle
+//  - wdl::ipc::np_server_handle
 
 #pragma once
 
 #include <windows.h>
-#include <wdl/debug.hpp>
 
-namespace wdl::handle
+#include <wdl/debug.hpp>
+#include <wdl/handle/unique_handle.hpp>
+
+namespace wdl::ipc
 {
-    // np_client_handle_traits
+    // wdl::ipc::np_client_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows named pipe client.
@@ -29,7 +33,9 @@ namespace wdl::handle
         }
     };
 
-    // np_server_handle_traits
+    using np_client_handle = wdl::handle::unique_handle<np_client_handle_traits>;
+
+    // wdl::ipc::np_server_handle_traits
     //
     // Traits definition appropriate for use
     // with Windows named pipe server.
@@ -48,4 +54,6 @@ namespace wdl::handle
             VERIFY(::DisconnectNamedPipe(value));
         }
     };
+
+    using np_server_handle = wdl::handle::unique_handle<np_server_handle_traits>;
 }

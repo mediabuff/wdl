@@ -11,20 +11,17 @@
 #include <string>
 #include <stdexcept>
 
-#include <wdl/utility/unique_handle.hpp>
+#include <wdl/ipc/base.hpp>
 
 namespace wdl::ipc
 {
     class duplex_pipe
     {
-        using np_server_handle_t = wdl::utility::np_server_handle;
-        using np_client_handle_t = wdl::utility::np_client_handle;
-
         std::wstring m_local_name;
         std::wstring m_remote_name;
 
-        np_server_handle_t  m_recv_pipe;
-        np_client_handle_t  m_send_pipe;
+        np_server_handle  m_recv_pipe;
+        np_client_handle  m_send_pipe;
 
     public:
         duplex_pipe()  = default;
@@ -57,7 +54,7 @@ namespace wdl::ipc
     {
         m_local_name = local_name;
 
-        m_recv_pipe = np_server_handle_t
+        m_recv_pipe = np_server_handle
         {
             ::CreateNamedPipeW(
                 m_local_name.c_str(),
@@ -92,7 +89,7 @@ namespace wdl::ipc
     {
         // NOTE: does not mess with WaitNamedPipe here
 
-        auto p = np_client_handle_t
+        auto p = np_client_handle
         {
             ::CreateFileW(
                 m_remote_name.c_str(),

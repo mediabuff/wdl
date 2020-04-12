@@ -1,15 +1,18 @@
 // heap.hpp
 //
-// Traits definitions for wdl::handle::unique_handle.
+// Type Definitions
+//  - wdl::handle::local_alloc_handle
 
 #pragma once
 
 #include <windows.h>
+
 #include <wdl/debug.hpp>
+#include <wdl/handle/unique_handle.hpp>
 
 namespace wdl::handle
 {
-    // local_handle_traits
+    // wdl::handle::local_alloc_handle_traits
     // 
     // Traits definition appropriate for memory
     // allocations made with LocalAlloc()
@@ -28,4 +31,6 @@ namespace wdl::handle
             VERIFY_(nullptr, ::LocalFree(value));
         }
     };
+
+    using local_alloc_handle = unique_handle<local_alloc_handle_traits>;
 }

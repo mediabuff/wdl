@@ -1,15 +1,19 @@
 // generic.hpp
 //
-// Traits definitions for wdl::handle::unique_handle.
+// Type Definitions
+//  - wdl::handle::null_handle
+//  - wdl::handle::invalid_handle
 
 #pragma once
 
 #include <windows.h>
+
 #include <wdl/debug.hpp>
+#include <wdl/handle/unique_handle.hpp>
 
 namespace wdl::handle
 {
-    // null_handle_traits
+    // wdl::handle::null_handle_traits
     // 
     // Traits definition appropriate for raw Windows handles
     // for which the return value on initilization failure 
@@ -30,7 +34,9 @@ namespace wdl::handle
         }
     };
 
-    // invalid_handle_traits
+    using null_handle = unique_handle<null_handle_traits>;
+
+    // wdl::handle::invalid_handle_traits
     //
     // Traits definition appropriate for raw Windows handles
     // for which the return value on initilization failure 
@@ -50,4 +56,6 @@ namespace wdl::handle
             ::CloseHandle(value);
         }
     };   
+
+    using invalid_handle = unique_handle<invalid_handle_traits>;
 }
