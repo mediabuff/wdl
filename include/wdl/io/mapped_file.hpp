@@ -1,4 +1,5 @@
-// mapped_file.h
+// mapped_file.hpp
+//
 // Class Implementation: wdl::io::mapped_file
 //
 // Windows memory mapped file wrapper.
@@ -6,23 +7,29 @@
 #pragma once
 
 #include <windows.h>
-#include "wdl/utility/unique_handle.hpp"
-
-using wdl::utility::null_handle;
-using wdl::utility::invalid_handle;
+#include <wdl/handle/generic.hpp>
 
 namespace wdl::io
 {
-	// mapped_file
+	// wdl::io::mapped_file
 	//
 	// RAII wrapper around memory mapped file.
 	// Mapped for readonly access.
 
 	class mapped_file
 	{
+		using null_handle    = wdl::handle::null_handle;
+		using invalid_handle = wdl::handle::invalid_handle;
+
+		const char*   m_begin{};
+		const char*   m_end{};
+		LARGE_INTEGER m_size{};
+
 	public:
 		explicit mapped_file(const wchar_t* filename) noexcept
 		{
+
+		
 			auto file = invalid_handle
 			{
 				::CreateFileW(
@@ -32,8 +39,7 @@ namespace wdl::io
 					nullptr,
 					OPEN_EXISTING,
 					FILE_ATTRIBUTE_NORMAL,
-					nullptr
-					)
+					nullptr)
 			};
 
 			if (!file) return;
@@ -45,8 +51,7 @@ namespace wdl::io
 					nullptr,
 					PAGE_READONLY,
 					0, 0,
-					nullptr
-					)
+					nullptr)
 			};
 
 			if (!mapping) return;
@@ -58,9 +63,7 @@ namespace wdl::io
 				::MapViewOfFile(
 					mapping.get(),
 					FILE_MAP_READ,
-					0, 0,
-					0
-				));
+					0, 0, 0));
 
 			if (!m_begin) return;
 
@@ -73,11 +76,15 @@ namespace wdl::io
 			unmap();
 		}
 
+
+		mapped_file(const mapped_file& other)          = delete;
+		mapped_file& operator=(const mapped_file& rhs) = delete;
+
 		mapped_file(mapped_file&& other) noexcept
 			: m_begin{ other.m_begin }, m_end{ other.m_end }
 		{
 			other.m_begin = nullptr;
-			other.m_end = nullptr;
+			other.m_end   = nullptr;
 		}
 
 		mapped_file& operator=(mapped_file&& rhs) noexcept
@@ -87,10 +94,10 @@ namespace wdl::io
 				unmap();
 
 				m_begin = rhs.m_begin;
-				m_end = rhs.m_end;
+				m_end   = rhs.m_end;
 
 				rhs.m_begin = nullptr;
-				rhs.m_end = nullptr;
+				rhs.m_end   = nullptr;
 			}
 
 			return *this;
@@ -116,9 +123,6 @@ namespace wdl::io
 			return m_size;
 		}
 
-		mapped_file(const mapped_file& other) = delete;
-		mapped_file& operator=(const mapped_file& rhs) = delete;
-
 	private:
 		void unmap() noexcept
 		{
@@ -127,24 +131,16 @@ namespace wdl::io
 				::UnmapViewOfFile(m_begin);
 			}
 		}
-
-		const char*   m_begin{};
-		const char*   m_end{};
-		LARGE_INTEGER m_size{};
 	};
 
-	// begin
-	//
-	// Free iterator function.
+	// wdl::io::begin()
 
 	const char* begin(const mapped_file& file) noexcept
 	{
 		return file.begin();
 	}
 
-	// end
-	//
-	// Free iterator function.
+	// wdl::io::end()
 
 	const char* end(const mapped_file& file) noexcept
 	{
