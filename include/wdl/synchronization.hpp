@@ -8,6 +8,7 @@
 #include "synchronization/critical_section_alt.hpp"
 #include "synchronization/critical_section.hpp"
 #include "synchronization/event.hpp"
+#include "synchronization/interprocess_barrier.hpp"
 #include "synchronization/mutex.hpp"
 #include "synchronization/slim_lock.hpp"
 #include "synchronization/wait.hpp"

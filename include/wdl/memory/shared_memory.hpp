@@ -31,10 +31,10 @@ namespace wdl::memory
 		ULARGE_INTEGER m_size{};
 
 	public:
-		explicit shared_memory(
-            wchar_t const*     name,
-            PULARGE_INTEGER    size,
-            shared_memory_type type = shared_memory_type::readwrite) noexcept
+		shared_memory(
+            wchar_t const*        name,
+            ULARGE_INTEGER const* size,
+            shared_memory_type    type = shared_memory_type::readwrite) noexcept
 		{
             auto const readonly = type == shared_memory_type::readonly;
             
