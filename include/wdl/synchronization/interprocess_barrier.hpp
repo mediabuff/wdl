@@ -19,21 +19,39 @@ namespace wdl::synchronization
 
     class interprocess_barrier
     {
-        using null_handle = wdl::handle::null_handle;
+        using null_handle     = wdl::handle::null_handle;
         using win32_exception = wdl::error::win32_exception;
+        
+        null_handle m_event;
+        null_handle m_mutex;
 
-        null_handle m_mapping;
-        null_handle m_semaphore;
-        char*       m_shared;
+        null_handle         m_mapping;
+
+        unsigned long long* m_count;
+        unsigned long long  m_threshold;
 
     public:
         interprocess_barrier(
-            wchar_t const* name,
-            long           count
-            )
+            wchar_t const*           name,
+            unsigned long long const threshold)
+            : m_threshold{ threshold }
         {
+            m_mutex = null_handle
+            {
+                ::CreateMutexW(nullptr, FALSE, name)
+            };
+
+            // barrier should only be initialized once
+            // creation of mutex implies that this thread also owns mutex
+            auto const creator = ::GetLastError() != ERROR_ALREADY_EXISTS;
+
+            m_event = null_handle 
+            {
+                ::CreateEventW(nullptr, TRUE, FALSE, name)
+            };
+
             auto const size 
-                = ULARGE_INTEGER{sizeof(long long), 0};
+                = ULARGE_INTEGER{sizeof(unsigned long long), 0};
 
 			m_mapping = null_handle
 			{
@@ -46,35 +64,17 @@ namespace wdl::synchronization
 					name)
 			};
 
-			if (!m_mapping) throw win32_exception{};
-
-            // the barrier should only be initialized once,
-            // the first time that the mapping is created
-            auto const should_initialize = 
-                !(::GetLastError() == ERROR_ALREADY_EXISTS);
-
-			m_shared = static_cast<char*>(
+			m_count = static_cast<unsigned long long*>(
 				::MapViewOfFile(
 					m_mapping.get(),
 					FILE_MAP_READ | FILE_MAP_WRITE,
 					0, 0, 
                     size.QuadPart));
 
-            if (!m_shared) throw win32_exception{};
-
-            if (should_initialize)
+            if (creator)
             {
-                ::InterlockedExchange64(
-                    reinterpret_cast<long long*>(m_shared),
-                    0);
+                *m_count = 0;
             }
-
-            m_semaphore = null_handle
-            {
-                ::CreateSemaphoreW(nullptr, 0, count, name)
-            };
-
-            if (!m_semaphore) throw win32_exception{};
         }
 
         ~interprocess_barrier()
@@ -86,15 +86,24 @@ namespace wdl::synchronization
         interprocess_barrier& operator=(interprocess_barrier const&) = delete;
 
         void enter()
-        {   
-            auto* count = reinterpret_cast<long long*>(m_shared);
-            auto const waiting = ::InterlockedIncrement64(count);
+        {               
+            ::WaitForSingleObject(m_mutex.get(), INFINITE);
+            
+            ++(*m_count);
+            while (*m_count < m_threshold)
+            {
+                ::SignalObjectAndWait(m_mutex.get(), m_event.get(), INFINITE, FALSE);
+                ::WaitForSingleObject(m_mutex.get(), INFINITE);
+            }
+            ::PulseEvent(m_event.get());
+            
+            ::ReleaseMutex(m_mutex.get());
         }
 
     private:
 		void unmap() noexcept
 		{
-            auto* begin = reinterpret_cast<char*>(m_shared);
+            auto* begin = reinterpret_cast<char*>(m_count);
 
 			if (begin)
 			{

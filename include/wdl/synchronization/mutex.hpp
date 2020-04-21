@@ -22,14 +22,18 @@ namespace wdl::synchronization
 		using null_handle_t = wdl::handle::null_handle;
 
 		null_handle_t m_handle;
+		bool          m_new_instance;
 
 	public:
 		mutex()
 			: m_handle{ ::CreateMutexW(nullptr, false, nullptr) }
 		{}
 
-		explicit mutex(std::wstring const& name)
-			: m_handle{ ::CreateMutexW(nullptr, false, name.c_str()) }
+		explicit mutex(
+			std::wstring const& name, 
+			bool const initial_owner = false)
+			: m_handle{ ::CreateMutexW(nullptr, initial_owner, name.c_str()) }
+			, m_new_instance{ ::GetLastError() != ERROR_ALREADY_EXISTS }
 		{}
 
 		// rely on unique_handle semantics for release
@@ -53,6 +57,11 @@ namespace wdl::synchronization
 		HANDLE get() const noexcept
 		{
 			return m_handle.get();
+		}
+
+		bool is_new_instance() const noexcept
+		{
+			return m_new_instance;
 		}
 
 		bool is_valid() const noexcept

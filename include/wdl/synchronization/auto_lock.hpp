@@ -1,8 +1,6 @@
 // auto_lock.hpp
 //
 // Class Implementation: wdl::synchronization::auto_lock
-//
-// Scoped-based lock wrapper.
 
 #pragma once
 
