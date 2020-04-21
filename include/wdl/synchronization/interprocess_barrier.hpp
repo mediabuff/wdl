@@ -15,7 +15,7 @@ namespace wdl::synchronization
     // wdl::synchronization::interprocess_barrier
     //
     // An extension of the Windows SYNCHRONIZATION_BARRIER
-    // that supports among distinct process contexts.
+    // that supports synchronization among distinct process contexts.
 
     class interprocess_barrier
     {
