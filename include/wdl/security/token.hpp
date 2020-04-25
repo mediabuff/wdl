@@ -2,15 +2,18 @@
 //
 // Free Function Definitions:
 //	- wdl::security::open_current_token()
+//	- wdl::security::get_token_information()
 //
 // Utility functions for working with Windows access tokens.
 
 #pragma once
 
 #include <windows.h>
+
+#include <memory>
 #include <iostream>
 
-#include <wdl/utility/unique_handle.hpp>
+#include <wdl/handle/generic.hpp>
 
 namespace wdl::security
 {
@@ -32,45 +35,70 @@ namespace wdl::security
 	//			  the currently thread's impersonation token or the token of
 	//			  its containing process
 	//
-	// Returns: a unique_handle wrapper around the token object
+	// Returns: a null_handle wrapper around the token object
 
-	wdl::utility::null_handle 
+	wdl::handle::null_handle 
 	open_current_token(
 		unsigned long        access  = TOKEN_QUERY,
 		open_thread_token_as open_as = open_thread_token_as::current
 	)
 	{
-		HANDLE h_token{};
-		bool open_as_self = open_as == open_thread_token_as::self;
+		auto token = wdl::handle::null_handle{};
+		bool const open_as_self = open_as == open_thread_token_as::self;
 
 		if (!::OpenThreadToken(
 			::GetCurrentThread(),
 			access,
 			open_as_self,
-			&h_token
+			token.put()
 		))
 		{
 			// call failed, determine the reason
 			if (ERROR_NO_TOKEN != ::GetLastError())
 			{
 				// other error unrelated to impersonation level
-				return wdl::utility::null_handle{};
+				return wdl::handle::null_handle{};
 			}
 			
 			// the calling thread is not impersonating; 
 			// proceed to try process token
 
 			if (!::OpenProcessToken(
-				GetCurrentProcess(),
+				::GetCurrentProcess(),
 				access,
-				&h_token
+				token.put()
 			))
 			{
-				return wdl::utility::null_handle{};
+				return wdl::handle::null_handle{};
 			}
 		}
 
-		// h_token now contains a valid HANDLE to the desired token object
-		return wdl::utility::null_handle{ h_token };
+		return token;
+	}
+
+	std::unique_ptr<char[]> get_token_information(
+		HANDLE                  token,
+		TOKEN_INFORMATION_CLASS info_class
+		)
+	{
+		auto required_size = unsigned long{};
+		if (!::GetTokenInformation(token, info_class, nullptr, 0, &required_size)
+			&& ::GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+		{
+			return std::unique_ptr<char[]>{};
+		}
+
+		auto buffer = std::make_unique<char[]>(required_size);
+		if (!::GetTokenInformation(
+			token, 
+			info_class,
+			buffer.get(),
+			required_size,
+			&required_size))
+		{
+			return std::unique_ptr<char[]>{};
+		}
+
+		return buffer;
 	}
 }
