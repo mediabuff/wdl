@@ -38,9 +38,9 @@ namespace wdl::io
 
         bool get_completion(
             unsigned long* bytes_xfer, 
-            PULONG_PTR key, 
-            LPOVERLAPPED* ppov,
-            unsigned long timeout = INFINITE
+            PULONG_PTR     key, 
+            LPOVERLAPPED*  ppov,
+            unsigned long  timeout = INFINITE
             );
 
         bool post_completion(
@@ -73,8 +73,7 @@ namespace wdl::io
             bytes_xfer,
             key,
             ppov,
-            timeout 
-            );
+            timeout);
     }
 
     bool iocp::post_completion(
