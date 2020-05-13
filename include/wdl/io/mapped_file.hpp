@@ -28,8 +28,6 @@ namespace wdl::io
 	public:
 		explicit mapped_file(const wchar_t* filename) noexcept
 		{
-
-		
 			auto file = invalid_handle
 			{
 				::CreateFileW(
